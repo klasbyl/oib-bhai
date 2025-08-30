@@ -175,9 +175,9 @@
   }
   
   /* Smooth transitions for all interactive elements */
-  .chat-interface * {
+  /* .chat-interface * {
     transition: all 0.2s ease-in-out;
-  }
+  } */
   
   /* Custom scrollbar for webkit browsers */
   .chat-interface ::-webkit-scrollbar {
@@ -195,5 +195,15 @@
   
   .chat-interface ::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 255, 255, 0.3);
+  }
+  
+  /* Hide browser scrollbar for custom scrollbar elements */
+  .custom-scrollbar {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
   }
 }

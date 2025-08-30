@@ -1,22 +1,20 @@
+"use client";
+
 import Image from "next/image";
+import { useState } from "react";
+import Sidebar from "@/components/Sidebar";
 
 // Asset imports
-const imgEllipse1 = "/assets/53bf75599706ef0e5e4456934f1b294151d93f59.png";
 const imgAsset12 = "/assets/640b20a128648296e24f7ce09fa56b28396d42ce.png";
-const imgFrame10 = "/assets/eef4aa0406513d1f8bad96a9c041bcde73b994ec.svg";
-const imgGroup = "/assets/377d174631c34357cd26596c83370cfb1b7f85b0.svg";
-const imgGroup1 = "/assets/d3deb3f73d5be574dc8ff02a4708d86ec3cf8a76.svg";
-const imgGroup2 = "/assets/26cb702bc3f45cbe3d2520a6757db423b98fe1a2.svg";
-const imgGroup3 = "/assets/10075025782609e53c183d59e6d3013cb3ac8ac2.svg";
+const imgFrame19 = "/assets/d09129f6602709bb5c29e32c765ade6258442ae8.svg";
+const imgFrame20 = "/assets/54212aa38c8d48f27cff07bb9a2a1bbfe77ab63f.svg";
+const imgVector4 = "/assets/1ac5dd6ed9e48c5888923a563979c8f56b46627c.svg";
+const imgVector5 = "/assets/08c401b681a7f06ff91478a7a2727f1e2d8a5bb6.svg";
 const imgVector = "/assets/5eceb407d33a6328409e0fe726d4f00769fc9e08.svg";
 const imgVector1 = "/assets/76ded5aa267c13e8c0d321d76b88c25e1a58665a.svg";
 const imgVector2 = "/assets/b0279ff2d6d8cdd3331384028d384ff7af34ac5f.svg";
 const imgGroup5 = "/assets/a74ec3a64363f6186a4db7a2ab988fb85b4d5e17.svg";
 const imgVector3 = "/assets/ef3b19fc5dfbb30127eeb376a8538e5ca93783d2.svg";
-const imgFrame19 = "/assets/d09129f6602709bb5c29e32c765ade6258442ae8.svg";
-const imgFrame20 = "/assets/54212aa38c8d48f27cff07bb9a2a1bbfe77ab63f.svg";
-const imgVector5 = "/assets/08c401b681a7f06ff91478a7a2727f1e2d8a5bb6.svg";
-const imgVector4 = "/assets/1ac5dd6ed9e48c5888923a563979c8f56b46627c.svg"; // Added missing asset
 
 interface CategoryButtonProps {
   icon: string;
@@ -47,47 +45,24 @@ const CategoryButton: React.FC<CategoryButtonProps> = ({
 );
 
 export default function ChatInterface() {
+  const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
+
+  const toggleSidebar = () => {
+    setIsSidebarExpanded(!isSidebarExpanded);
+  };
+
+  const closeSidebar = () => {
+    setIsSidebarExpanded(false);
+  };
+
   return (
     <div className="chat-interface bg-[#1c1c1c] h-screen w-full relative flex overflow-hidden">
       {/* Sidebar Navigation */}
-      <div className="bg-[#222222] w-[72px] min-w-[72px] h-[calc(100vh-16px)] rounded-[20px] m-2 flex flex-col items-center justify-between py-2 relative">
-        {/* Top navigation items */}
-        <div className="flex flex-col items-center gap-1.5">
-          {/* Logo/Home icon */}
-          <div className="w-[38px] h-9 flex items-center justify-center hover:opacity-80 transition-opacity cursor-pointer">
-            <Image src={imgFrame10} alt="Home" width={38} height={40} className="w-full h-full" />
-          </div>
-          
-          {/* Navigation buttons */}
-          <div className="w-[38px] h-9 bg-gradient-to-r from-[#504e4e] to-[#595858] rounded-[10px] flex items-center justify-center hover:opacity-80 transition-opacity cursor-pointer">
-            <Image src={imgGroup} alt="Navigation" width={18} height={18} />
-          </div>
-          
-          <div className="w-[38px] h-9 bg-gradient-to-r from-[#504e4e] to-[#595858] rounded-[10px] flex items-center justify-center hover:opacity-80 transition-opacity cursor-pointer">
-            <Image src={imgGroup1} alt="Navigation" width={18} height={18} />
-          </div>
-          
-          <div className="w-[38px] h-9 bg-gradient-to-r from-[#504e4e] to-[#595858] rounded-[10px] flex items-center justify-center hover:opacity-80 transition-opacity cursor-pointer">
-            <Image src={imgGroup2} alt="Navigation" width={18} height={18} />
-          </div>
-        </div>
-
-        {/* Bottom section */}
-        <div className="flex flex-col items-center gap-2">
-          {/* Divider line */}
-          <div className="w-10 h-px bg-white/20"></div>
-          
-          {/* Profile section */}
-          <div className="relative cursor-pointer hover:opacity-80 transition-opacity">
-            <div className="w-9 h-9 rounded-full overflow-hidden">
-              <Image src={imgEllipse1} alt="Profile" width={40} height={40} className="w-full h-full object-cover" />
-            </div>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <Image src={imgGroup3} alt="Profile icon" width={18} height={18} />
-            </div>
-          </div>
-        </div>
-      </div>
+      <Sidebar 
+        isExpanded={isSidebarExpanded}
+        onToggle={toggleSidebar}
+        onClose={closeSidebar}
+      />
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col h-full overflow-hidden">
