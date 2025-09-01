@@ -3,41 +3,9 @@
 import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
 import { useCustomScrollbar } from "@/hooks/use-custom-scrollbar";
-
-// Asset imports
-const imgEllipse1 = "/assets/53bf75599706ef0e5e4456934f1b294151d93f59.png";
-const imgFrame10 = "/assets/eef4aa0406513d1f8bad96a9c041bcde73b994ec.svg";
-const imgGroup = "/assets/377d174631c34357cd26596c83370cfb1b7f85b0.svg";
-const imgGroup1 = "/assets/d3deb3f73d5be574dc8ff02a4708d86ec3cf8a76.svg";
-const imgGroup2 = "/assets/26cb702bc3f45cbe3d2520a6757db423b98fe1a2.svg";
-const imgGroup3 = "/assets/10075025782609e53c183d59e6d3013cb3ac8ac2.svg";
-const imgVectorSearch = "/assets/56079bbf4c7b65d985bb245bb2cdfd86398e6614.svg";
-const imgVectorExpand = "/assets/4530752161363026214efdef323c68ad717900a7.svg";
-const imgVectorNewChat = "/assets/d93e2a2582f0e707f42737ad7aaaf61621474c27.svg";
-const imgVectorArrow = "/assets/d1428bb9796cca07e66a235c9a3352a29d1b9510.svg";
-const imgVectorArrowGray = "/assets/e56c88d93cc1ca2bf6495c035bbd8cd75bce7034.svg";
-
-// Mock data for chat history
-const mockChatHistory = [
-  "Daily Planner – Aug 20",
-  "Resume Feedback Session",
-  "Travel Itinerary Ideas",
-  "Brainstorming Startup Names",
-  "Job Interview Practice",
-  "Recipe Finder: Pasta Variations",
-  "Drafting Email Reply",
-  "Workout Routine Setup",
-  "Wellness Check-in",
-  "Quick Q&A – Python Errors",
-  "Brainstorming Startup Names",
-  "Math Help: Algebra Basics"
-];
-
-interface SidebarProps {
-  isExpanded: boolean;
-  onToggle: () => void;
-  onClose: () => void;
-}
+import { ASSETS, MOCK_CHAT_HISTORY, Z_INDEX } from "@/lib/constants";
+import { cn } from "@/lib/helpers";
+import type { SidebarProps } from "@/types";
 
 export default function Sidebar({ isExpanded, onToggle, onClose }: SidebarProps) {
   const sidebarRef = useRef<HTMLDivElement>(null);
@@ -83,100 +51,261 @@ export default function Sidebar({ isExpanded, onToggle, onClose }: SidebarProps)
   return (
     <div 
       ref={sidebarRef}
-      className={`bg-[#1f1f1f] mobile-fit-screen ${
+      className={`bg-[#1f1f1f] mobile-fit-screen overflow-hidden ${
         isExpanded 
           ? 'w-[300px] fixed z-50 md:relative md:z-auto top-2 left-2 right-2 bottom-2 md:inset-auto md:m-2 md:ml-2 md:mr-1 rounded-[20px] md:h-[calc(100vh-16px)]' 
           : 'w-[80px] md:w-[72px] min-w-[80px] md:min-w-[72px] md:m-2 m-2 h-[calc(100vh-32px)] md:h-[calc(100vh-16px)] rounded-[20px]'
-      } flex flex-col relative transition-all duration-300`}
+      } flex flex-col relative`}
+      style={{
+        transition: 'width 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+      }}
     >
-      {isExpanded ? (
-        // Expanded Sidebar
-        <div className="h-full flex flex-col">
-          {/* Header */}
-          <div className="p-5 pb-4 flex items-center justify-between">
-            <h1 className="text-white text-[28px] font-semibold">My Chats</h1>
-            <button 
-              onClick={onToggle}
-              data-sidebar-toggle
-              // className="w-8 h-8 bg-[#504e4e] rounded-[8px] flex items-center justify-center hover:bg-[#595858] transition-colors"
-            >
-              <Image src="/assets/a574039df521d686ab6965aae607a65faa7fca23.svg" alt="Collapse" width={20} height={20} />
-            </button>
-          </div>
+      {/* Header Section */}
+      <div 
+        className={`flex items-center pt-3 pb-4 relative ${
+          isExpanded ? 'px-5 justify-between' : 'px-0 justify-center'
+        }`}
+        style={{
+          transition: 'padding 0.4s cubic-bezier(0.4, 0, 0.2, 1), justify-content 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+        }}
+      >
+        {/* Collapsed state: Home icon */}
+        <div 
+          className={`flex items-center justify-center cursor-pointer hover:opacity-80 ${
+            isExpanded 
+              ? 'w-0 h-0 opacity-0 overflow-hidden' 
+              : 'w-10 h-10 opacity-100'
+          }`}
+          style={{
+            transition: 'opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1), height 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+          }}
+          onClick={onToggle}
+          aria-label="Expand sidebar"
+        >
+          <Image src={ASSETS.icons.home} alt="Home" width={25} height={25} />
+        </div>
 
-          {/* Navigation Buttons */}
-          <div className="px-5 space-y-2">
-            <button className="w-full bg-gradient-to-r from-[#504e4e] to-[#595858] rounded-[10px] px-4 py-2.5 flex items-center gap-4 text-white text-[16px] hover:opacity-80 transition-opacity">
-              <Image src={imgVectorNewChat} alt="New Chat" width={12} height={12} />
-              <span>New Chat</span>
-            </button>
-            
-            <button className="w-full bg-gradient-to-r from-[#504e4e] to-[#595858] rounded-[10px] px-4 py-2.5 flex items-center gap-4 text-white text-[16px] hover:opacity-80 transition-opacity">
-              <Image src={imgGroup} alt="Library" width={18} height={18} />
-              <span>Library</span>
-            </button>
-            
-            <button className="w-full bg-gradient-to-r from-[#504e4e] to-[#595858] rounded-[10px] px-4 py-2.5 flex items-center gap-4 text-white text-[16px] hover:opacity-80 transition-opacity">
-              <Image src={imgGroup1} alt="Analytics" width={18} height={18} />
-              <span>Analytics</span>
-            </button>
-            
-            <button className="w-full bg-gradient-to-r from-[#504e4e] to-[#595858] rounded-[10px] px-4 py-2.5 flex items-center gap-4 text-white text-[16px] hover:opacity-80 transition-opacity">
-              <Image src={imgGroup2} alt="Archive" width={18} height={18} />
-              <span>Archive</span>
-            </button>
-          </div>
+        {/* Expanded state: Title and collapse button */}
+        <div 
+          className={`flex items-center justify-between w-full ${
+            isExpanded 
+              ? 'opacity-100 translate-x-0' 
+              : 'opacity-0 translate-x-4 pointer-events-none absolute'
+          }`}
+          style={{
+            transition: 'opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+          }}
+        >
+          <h1 className="text-white text-[28px] font-semibold whitespace-nowrap">My Chats</h1>
+          <button 
+            onClick={onToggle}
+            data-sidebar-toggle
+            // className="w-8 h-8 bg-[#504e4e] rounded-[8px] flex items-center justify-center hover:bg-[#595858] transition-colors focus:outline-none focus:ring-2 focus:ring-white/20 ml-4"
+            aria-label="Collapse sidebar"
+          >
+            <Image src={ASSETS.icons.collapse} alt="Collapse" width={20} height={20} />
+          </button>
+        </div>
+      </div>
 
-          {/* Recent Section */}
-          <div className="px-5 pt-6 pb-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-white text-[20px] font-medium">Recent</h2>
-              <Image src={imgVectorExpand} alt="Expand" width={11} height={15} />
-            </div>
-          </div>
+      {/* Navigation Buttons Section */}
+      <div 
+        className={`space-y-2 flex flex-col items-center ${
+          isExpanded ? 'px-5 items-start' : 'px-0 items-center'
+        }`}
+        style={{
+          transition: 'padding 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+        }}
+      >
+        {/* New Chat Button */}
+        <button 
+          className={`bg-gradient-to-r from-[#504e4e] to-[#595858] rounded-[10px] flex items-center text-white hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-white/20 ${
+            isExpanded 
+              ? 'w-full px-4 py-2.5 gap-4 text-[16px] h-auto' 
+              : 'w-10 h-10 justify-center px-0 py-0'
+          }`}
+          style={{
+            transition: 'width 0.4s cubic-bezier(0.4, 0, 0.2, 1), padding 0.4s cubic-bezier(0.4, 0, 0.2, 1), gap 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+          }}
+          onClick={isExpanded ? undefined : onToggle}
+          aria-label="New Chat"
+        >
+          <Image src={ASSETS.icons.newChat} alt="New Chat" width={12} height={12} className="flex-shrink-0" />
+          <span 
+            className={`whitespace-nowrap ${
+              isExpanded 
+                ? 'opacity-100 translate-x-0' 
+                : 'opacity-0 translate-x-4 w-0 overflow-hidden'
+            }`}
+            style={{
+              transition: 'opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.2s, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.2s, width 0.1s ease-out'
+            }}
+          >
+            New Chat
+          </span>
+        </button>
+        
+        {/* Library Button */}
+        <button 
+          className={`bg-gradient-to-r from-[#504e4e] to-[#595858] rounded-[10px] flex items-center text-white hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-white/20 ${
+            isExpanded 
+              ? 'w-full px-4 py-2.5 gap-4 text-[16px] h-auto' 
+              : 'w-10 h-10 justify-center px-0 py-0'
+          }`}
+          style={{
+            transition: 'width 0.4s cubic-bezier(0.4, 0, 0.2, 1), padding 0.4s cubic-bezier(0.4, 0, 0.2, 1), gap 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+          }}
+          onClick={isExpanded ? undefined : onToggle}
+          aria-label="Library"
+        >
+          <Image src={ASSETS.icons.library} alt="Library" width={18} height={18} className="flex-shrink-0" />
+          <span 
+            className={`whitespace-nowrap ${
+              isExpanded 
+                ? 'opacity-100 translate-x-0' 
+                : 'opacity-0 translate-x-4 w-0 overflow-hidden'
+            }`}
+            style={{
+              transition: 'opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.2s, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.2s, width 0.1s ease-out'
+            }}
+          >
+            Library
+          </span>
+        </button>
+        
+        {/* Analytics Button */}
+        <button 
+          className={`bg-gradient-to-r from-[#504e4e] to-[#595858] rounded-[10px] flex items-center text-white hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-white/20 ${
+            isExpanded 
+              ? 'w-full px-4 py-2.5 gap-4 text-[16px] h-auto' 
+              : 'w-10 h-10 justify-center px-0 py-0'
+          }`}
+          style={{
+            transition: 'width 0.4s cubic-bezier(0.4, 0, 0.2, 1), padding 0.4s cubic-bezier(0.4, 0, 0.2, 1), gap 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+          }}
+          onClick={isExpanded ? undefined : onToggle}
+          aria-label="Analytics"
+        >
+          <Image src={ASSETS.icons.analytics} alt="Analytics" width={18} height={18} className="flex-shrink-0" />
+          <span 
+            className={`whitespace-nowrap ${
+              isExpanded 
+                ? 'opacity-100 translate-x-0' 
+                : 'opacity-0 translate-x-4 w-0 overflow-hidden'
+            }`}
+            style={{
+              transition: 'opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.2s, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.2s, width 0.1s ease-out'
+            }}
+          >
+            Analytics
+          </span>
+        </button>
+        
+        {/* Archive Button */}
+        <button 
+          className={`bg-gradient-to-r from-[#504e4e] to-[#595858] rounded-[10px] flex items-center text-white hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-white/20 ${
+            isExpanded 
+              ? 'w-full px-4 py-2.5 gap-4 text-[16px] h-auto' 
+              : 'w-10 h-10 justify-center px-0 py-0'
+          }`}
+          style={{
+            transition: 'width 0.4s cubic-bezier(0.4, 0, 0.2, 1), padding 0.4s cubic-bezier(0.4, 0, 0.2, 1), gap 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+          }}
+          onClick={isExpanded ? undefined : onToggle}
+          aria-label="Archive"
+        >
+          <Image src={ASSETS.icons.archive} alt="Archive" width={18} height={18} className="flex-shrink-0" />
+          <span 
+            className={`whitespace-nowrap ${
+              isExpanded 
+                ? 'opacity-100 translate-x-0' 
+                : 'opacity-0 translate-x-4 w-0 overflow-hidden'
+            }`}
+            style={{
+              transition: 'opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.2s, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.2s, width 0.1s ease-out'
+            }}
+          >
+            Archive
+          </span>
+        </button>
+      </div>
 
-          {/* Search */}
-          <div className="px-5 pb-4">
-            <div className="relative">
-              <input 
-                type="text" 
-                placeholder="Search" 
-                className="w-full bg-transparent border border-[#858484] rounded-[8px] px-4 py-2.5 text-[#c4c1c1] text-[14px] outline-none"
-              />
-              <Image 
-                src={imgVectorSearch} 
-                alt="Search" 
-                width={13} 
-                height={13} 
-                className="absolute right-3 top-1/2 -translate-y-1/2"
-              />
-            </div>
+      {/* Expanded Only Content - Recent and Search */}
+      <div 
+        className={`overflow-hidden ${
+          isExpanded 
+            ? 'opacity-100 translate-x-0' 
+            : 'opacity-0 translate-x-4 pointer-events-none'
+        }`}
+        style={{
+          transition: 'opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.1s, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.1s'
+        }}
+      >
+        {/* Recent Section */}
+        <div className="px-5 pt-6 pb-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-white text-[20px] font-medium">Recent</h2>
+            <Image src="/assets/4530752161363026214efdef323c68ad717900a7.svg" alt="Expand" width={11} height={15} />
           </div>
+        </div>
 
-          {/* Chat History - Scrollable */}
-          <div className="flex-1 px-5 overflow-hidden relative">
-            <div 
-              ref={scrollContainerRef}
-              className="h-full overflow-y-auto pr-2 space-y-1 custom-scrollbar"
-              onScroll={handleScroll}
-            >
-              {/* Active Chat */}
-              <div className="bg-[#504e4e] rounded-[8px] px-4 py-2.5 flex items-center justify-between">
-                <span className="text-white text-[14px]">New Chat</span>
-                <Image src={imgVectorArrow} alt="Arrow" width={13} height={3} className="rotate-90" />
-              </div>
-              
-              {/* Chat History Items */}
-              {mockChatHistory.map((chat, index) => (
-                <div key={index} className="rounded-[8px] px-4 py-2.5 flex items-center justify-between hover:bg-[#2a2a2a] transition-colors cursor-pointer">
-                  <span className="text-[#858484] text-[14px] truncate">{chat}</span>
-                  <Image src={imgVectorArrowGray} alt="Arrow" width={13} height={3} className="rotate-90" />
+        {/* Search */}
+        <div className="px-5 pb-4">
+          <div className="relative">
+            <input 
+              type="text" 
+              placeholder="Search" 
+              className="w-full bg-transparent border border-[#858484] rounded-[8px] px-4 py-2.5 text-[#c4c1c1] text-[14px] outline-none"
+            />
+            <Image 
+              src={ASSETS.icons.search} 
+              alt="Search" 
+              width={13} 
+              height={13} 
+              className="absolute right-3 top-1/2 -translate-y-1/2"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Chat History - Always Scrollable */}
+      <div className="flex-1 overflow-hidden relative">
+        <div 
+          className={`h-full ${isExpanded ? 'px-5' : 'px-2'}`}
+          style={{
+            transition: 'padding 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+          }}
+        >
+          <div 
+            ref={scrollContainerRef}
+            className="h-full overflow-y-auto pr-2 space-y-1 custom-scrollbar"
+            onScroll={handleScroll}
+          >
+            {isExpanded ? (
+              <>
+                {/* Active Chat */}
+                <div className="bg-[#504e4e] rounded-[8px] px-4 py-2.5 flex items-center justify-between">
+                  <span className="text-white text-[14px]">New Chat</span>
+                  <Image src="/assets/d1428bb9796cca07e66a235c9a3352a29d1b9510.svg" alt="Arrow" width={13} height={3} className="rotate-90" />
                 </div>
-              ))}
-            </div>
-            
-            {/* Custom Scrollbar */}
-            <div className="absolute right-2 top-0 bottom-0 w-2 pointer-events-auto">
+                
+                {/* Chat History Items */}
+                {MOCK_CHAT_HISTORY.map((chat: string, index: number) => (
+                  <div key={index} className="rounded-[8px] px-4 py-2.5 flex items-center justify-between hover:bg-[#2a2a2a] transition-colors cursor-pointer">
+                    <span className="text-[#858484] text-[14px] truncate">{chat}</span>
+                    <Image src="/assets/e56c88d93cc1ca2bf6495c035bbd8cd75bce7034.svg" alt="Arrow" width={13} height={3} className="rotate-90" />
+                  </div>
+                ))}
+              </>
+            ) : (
+              /* Collapsed mode - empty space */
+              <div className="h-full"></div>
+            )}
+          </div>
+          
+          {/* Custom Scrollbar - Only show when expanded */}
+          {isExpanded && (
+            <div className="absolute right-2 top-1 bottom-1 w-2 pointer-events-auto">
               <div 
                 className="relative h-full w-full bg-[#2a2a2a] rounded-full cursor-pointer"
                 onClick={handleScrollbarTrackClick}
@@ -193,73 +322,74 @@ export default function Sidebar({ isExpanded, onToggle, onClose }: SidebarProps)
                 />
               </div>
             </div>
-          </div>
+          )}
+        </div>
+      </div>
 
-          {/* Divider */}
-          <div className="px-5 py-2">
-            <div className="h-px bg-white/20"></div>
-          </div>
-
-          {/* Profile Section */}
-          <div className="px-5 pb-4 safe-area-inset-bottom">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full overflow-hidden">
-                <Image src={imgEllipse1} alt="Profile" width={40} height={40} className="w-full h-full object-cover" />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-white text-[16px] font-medium">Abhijeet Jharbade</span>
-                <span className="text-white text-[12px] font-light">Free</span>
-              </div>
+      {/* Bottom Section - Divider and Profile */}
+      <div className="flex flex-col items-center">
+        {/* Divider */}
+        <div 
+          className={`h-px bg-white/20 ${
+            isExpanded ? 'w-full mx-5 mb-2' : 'w-10 mb-4'
+          }`}
+          style={{
+            transition: 'width 0.4s cubic-bezier(0.4, 0, 0.2, 1), margin 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+          }}
+        ></div>
+        
+        {/* Profile Section */}
+        <div 
+          className={`cursor-pointer hover:opacity-80 transition-opacity pb-4 safe-area-inset-bottom ${
+            isExpanded ? 'px-5 w-full' : 'px-0'
+          }`} 
+          onClick={onToggle}
+          style={{
+            transition: 'padding 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+          }}
+          role="button"
+          aria-label={isExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              onToggle();
+            }
+          }}
+        >
+          <div 
+            className={`flex items-center ${
+              isExpanded ? 'gap-3' : 'justify-center'
+            }`}
+            style={{
+              transition: 'gap 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+            }}
+          >
+            <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
+              <Image 
+                src={ASSETS.images.profile} 
+                alt="Abhijeet Jharbade profile picture" 
+                width={40} 
+                height={40} 
+                className="w-full h-full object-cover" 
+              />
+            </div>
+            <div 
+              className={`flex flex-col ${
+                isExpanded 
+                  ? 'opacity-100 translate-x-0' 
+                  : 'opacity-0 translate-x-4 w-0 overflow-hidden'
+              }`}
+              style={{
+                transition: 'opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.2s, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.2s, width 0.1s ease-out'
+              }}
+            >
+              <span className="text-white text-[16px] font-medium whitespace-nowrap">Abhijeet Jharbade</span>
+              <span className="text-white text-[12px] font-light whitespace-nowrap">Free</span>
             </div>
           </div>
         </div>
-      ) : (
-        // Collapsed Sidebar
-        <div className="flex flex-col items-center h-full py-3 md:py-2 relative safe-area-inset-bottom">
-          {/* Top section with logo and navigation */}
-          <div className="flex flex-col items-center">
-            {/* Logo/Home icon */}
-            <div className="w-10 h-10 md:w-[26px] md:h-6.5 flex items-center justify-center hover:opacity-80 transition-opacity cursor-pointer mb-4 md:mb-3" onClick={onToggle}>
-              <Image src={imgGroup3} alt="Home" width={20} height={20} className="w-6 h-6 md:w-full md:h-full" />
-            </div>
-            
-            {/* Navigation buttons */}
-            <div className="flex flex-col items-center gap-3 md:gap-2">
-              <div className="w-12 h-12 md:w-[38px] md:h-9 bg-gradient-to-r from-[#504e4e] to-[#595858] rounded-[12px] md:rounded-[10px] flex items-center justify-center hover:opacity-80 transition-opacity cursor-pointer" onClick={onToggle}>
-                <Image src={imgFrame10} alt="Navigation" width={30} height={30} className="w-7 h-7 md:w-[30px] md:h-[30px]" />
-              </div>
-            
-              <div className="w-12 h-12 md:w-[38px] md:h-9 bg-gradient-to-r from-[#504e4e] to-[#595858] rounded-[12px] md:rounded-[10px] flex items-center justify-center hover:opacity-80 transition-opacity cursor-pointer" onClick={onToggle}>
-                <Image src={imgGroup} alt="Navigation" width={18} height={18} className="w-5 h-5 md:w-[18px] md:h-[18px]" />
-              </div>
-              
-              <div className="w-12 h-12 md:w-[38px] md:h-9 bg-gradient-to-r from-[#504e4e] to-[#595858] rounded-[12px] md:rounded-[10px] flex items-center justify-center hover:opacity-80 transition-opacity cursor-pointer" onClick={onToggle}>
-                <Image src={imgGroup1} alt="Navigation" width={18} height={18} className="w-5 h-5 md:w-[18px] md:h-[18px]" />
-              </div>
-              
-              <div className="w-12 h-12 md:w-[38px] md:h-9 bg-gradient-to-r from-[#504e4e] to-[#595858] rounded-[12px] md:rounded-[10px] flex items-center justify-center hover:opacity-80 transition-opacity cursor-pointer" onClick={onToggle}>
-                <Image src={imgGroup2} alt="Navigation" width={18} height={18} className="w-5 h-5 md:w-[18px] md:h-[18px]" />
-              </div>
-            </div>
-          </div>
-
-          {/* Spacer to push bottom section down */}
-          <div className="flex-1"></div>
-
-          {/* Bottom section */}
-          <div className="flex flex-col items-center gap-3 md:gap-2">
-            {/* Divider line */}
-            <div className="w-12 md:w-10 h-px bg-white/20"></div>
-            
-            {/* Profile section */}
-            <div className="relative cursor-pointer hover:opacity-80 transition-opacity" onClick={onToggle}>
-              <div className="w-11 h-11 md:w-9 md:h-9 rounded-full overflow-hidden">
-                <Image src={imgEllipse1} alt="Profile" width={40} height={40} className="w-full h-full object-cover" />
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      </div>
     </div>
   );
 }

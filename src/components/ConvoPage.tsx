@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useState } from "react";
 import Sidebar from "@/components/Sidebar";
 import SourcesPanel from "@/components/SourcesPanel";
+
 import { useCustomScrollbar } from "@/hooks/use-custom-scrollbar";
 
 // Asset imports
@@ -49,6 +50,7 @@ const CategoryButton: React.FC<CategoryButtonProps> = ({
 export default function ConvoPage() {
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
   const [isSourcesPanelOpen, setIsSourcesPanelOpen] = useState(false);
+  const [isReasoningExpanded, setIsReasoningExpanded] = useState(false);
   const {
     scrollThumbTop,
     scrollThumbHeight,
@@ -76,6 +78,10 @@ export default function ConvoPage() {
 
   const closeSourcesPanel = () => {
     setIsSourcesPanelOpen(false);
+  };
+
+  const toggleReasoning = () => {
+    setIsReasoningExpanded(!isReasoningExpanded);
   };
 
   return (
@@ -144,10 +150,73 @@ export default function ConvoPage() {
 
                 {/* AI Response */}
                 <div className="flex flex-col gap-[34px] items-start w-full">
-                  {/* Reasoning Badge */}
-                  <div className="bg-[#403d3d] rounded-[8px] p-[10px] flex items-center justify-between w-[158px]">
-                    <span className="text-white text-[16px] font-normal">Reasoning</span>
-                    <Image src="/assets/16272f05344228869b38d2a7a01e1ad41641425b.svg" alt="Reasoning icon" width={12} height={12} />
+                  {/* Reasoning Section - Conditional Background */}
+                  <div className={`rounded-[12px] w-full transition-all duration-400 ease-out ${
+                    isReasoningExpanded ? 'bg-[#343333]' : 'bg-transparent'
+                  }`}>
+                    {/* Reasoning Button - Always Visible */}
+                    <div className="p-5 pb-0">
+                      <button 
+                        onClick={toggleReasoning}
+                        className={`bg-[#403d3d] rounded-[8px] p-[10px] flex items-center justify-between w-[158px] hover:bg-[#4a4747] transition-all duration-300 ease-out focus:outline-none focus:ring-2 focus:ring-white/20 ${
+                          isReasoningExpanded ? 'border border-white' : 'border border-transparent'
+                        }`}
+                        aria-expanded={isReasoningExpanded}
+                        aria-label={`${isReasoningExpanded ? 'Collapse' : 'Expand'} reasoning section`}
+                      >
+                        <span className="text-white text-[16px] font-normal">Reasoning</span>
+                        <div 
+                          className="w-4 h-3 flex items-center justify-center"
+                          style={{
+                            transform: isReasoningExpanded ? 'rotate(135deg)' : 'rotate(315deg)',
+                            transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                          }}
+                        >
+                          <Image src="/assets/f336b203bf6c218af18453ce2315e93526c43331.svg" alt="Toggle" width={12} height={12} />
+                        </div>
+                      </button>
+                    </div>
+                    
+                    {/* Expandable Content Only */}
+                    <div 
+                      className={`overflow-hidden transition-all duration-400 ease-out ${
+                        isReasoningExpanded ? 'max-h-[400px] opacity-100' : 'max-h-0 opacity-0'
+                      }`}
+                    >
+                      <div className="p-5 pt-5 relative">
+                        <div 
+                          className="font-['DM_Sans:Regular',_sans-serif] font-normal leading-[0] text-[14px] text-white" 
+                          style={{ fontVariationSettings: "'opsz' 14" }}
+                        >
+                          <ol className="list-decimal mb-0" start={4}>
+                            <li className="ms-[21px]">
+                              <span className="leading-[22px]">Personalization & Familiarity</span>
+                            </li>
+                          </ol>
+                          <ul className="list-disc mb-0">
+                                                      <li className="mb-0 ms-[21px]">
+                            <span className="leading-[22px]">Titles such as &ldquo;Wellness Check-in&rdquo; or &ldquo;Workout Routine Setup&rdquo; feel personalized and human-like, reinforcing trust in the bot.</span>
+                          </li>
+                            <li className="ms-[21px]">
+                              <span className="leading-[22px]">It mimics how humans label notes or reminders</span>
+                            </li>
+                          </ul>
+                          <p className="leading-[22px] mb-0">.</p>
+                          <p className="leading-[22px] mb-0">5. Balance Between Generic & Specific</p>
+                          <ul className="list-disc">
+                            <li className="mb-0 ms-[21px]">
+                              <span className="leading-[22px]">Some titles are generic and flexible (&ldquo;Drafting Email Reply&rdquo;, &ldquo;Quick Q&A – Python Errors&rdquo;).</span>
+                            </li>
+                            <li className="mb-0 ms-[21px]">
+                              <span className="leading-[22px]">Others are specific and descriptive (&ldquo;Brainstorming Startup Names&rdquo;, &ldquo;Creative Story Draft&rdquo;).</span>
+                            </li>
+                            <li className="ms-[21px]">
+                              <span className="leading-[22px]">This balance makes the chat history tidy yet useful across different use cases.</span>
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
                   {/* AI Message Content */}
@@ -155,7 +224,7 @@ export default function ConvoPage() {
                     <div className="bg-[#222222] rounded-[10px] w-full p-[27px] pt-4">
                       <div className="text-white text-[16px] font-normal leading-[30px]">
                         <p className="mb-0">
-                          Sure 👍 Here's a <span className="font-bold">short & simple version:</span>
+                          Sure 👍 Here&apos;s a <span className="font-bold">short & simple version:</span>
                         </p>
                         <p className="mb-0">&nbsp;</p>
                         <ol className="list-decimal mb-0 ml-6">
