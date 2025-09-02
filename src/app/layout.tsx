@@ -18,7 +18,12 @@ export const metadata: Metadata = {
   description: "Professional AI chat interface with smart conversations and source management",
   keywords: "AI, chat, conversation, sources, productivity",
   authors: [{ name: "Bio Team" }],
-  viewport: "width=device-width, initial-scale=1, viewport-fit=cover",
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
