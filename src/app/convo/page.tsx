@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import ConvoPage from "@/components/ConvoPage";
 
 export const metadata = {
@@ -13,9 +12,5 @@ export const viewport = {
 };
 
 export default function Convo() {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <ConvoPage />
-    </Suspense>
-  );
+  return <ConvoPage />;
 }
