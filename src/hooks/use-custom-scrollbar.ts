@@ -4,7 +4,7 @@ interface UseCustomScrollbarReturn {
   scrollThumbTop: number;
   scrollThumbHeight: number;
   isDragging: boolean;
-  scrollContainerRef: React.RefObject<HTMLDivElement>;
+  scrollContainerRef: React.RefObject<HTMLDivElement | null>;
   handleScroll: () => void;
   handleScrollbarMouseDown: (e: React.MouseEvent) => void;
   handleScrollbarTrackClick: (e: React.MouseEvent) => void;
