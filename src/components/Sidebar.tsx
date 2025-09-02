@@ -433,7 +433,6 @@ export default function Sidebar({ isExpanded, onToggle, onClose }: SidebarProps)
       <ProfileMenu 
         isOpen={isProfileMenuOpen} 
         onClose={closeProfileMenu} 
-        isSidebarExpanded={isExpanded}
       />
     </div>
   );
