@@ -1,10 +1,6 @@
-import dynamic from "next/dynamic";
+import { Suspense } from "react";
+import ConvoPage from "@/components/ConvoPage";
 import LoadingSpinner from "@/components/LoadingSpinner";
-
-const ConvoPage = dynamic(() => import("@/components/ConvoPage"), {
-  loading: () => <LoadingSpinner />,
-  ssr: false
-});
 
 export const metadata = {
   title: "Conversation - One In a Billion",
@@ -18,5 +14,9 @@ export const viewport = {
 };
 
 export default function Convo() {
-  return <ConvoPage />;
+  return (
+    <Suspense fallback={<LoadingSpinner />}>
+      <ConvoPage />
+    </Suspense>
+  );
 }
