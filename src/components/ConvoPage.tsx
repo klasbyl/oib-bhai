@@ -1,9 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Sidebar from "@/components/Sidebar";
 import SourcesPanel from "@/components/SourcesPanel";
+import { useSearchParams } from "next/navigation";
 
 import { useCustomScrollbar } from "@/hooks/use-custom-scrollbar";
 
@@ -51,6 +52,13 @@ export default function ConvoPage() {
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
   const [isSourcesPanelOpen, setIsSourcesPanelOpen] = useState(false);
   const [isReasoningExpanded, setIsReasoningExpanded] = useState(false);
+  const [initialMessage, setInitialMessage] = useState<string>("");
+  const [message, setMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [newUserMessage, setNewUserMessage] = useState<string>("");
+  const [showNewResponse, setShowNewResponse] = useState(false);
+  const searchParams = useSearchParams();
+  
   const {
     scrollThumbTop,
     scrollThumbHeight,
@@ -59,6 +67,14 @@ export default function ConvoPage() {
     handleScrollbarMouseDown,
     handleScrollbarTrackClick,
   } = useCustomScrollbar();
+
+  // Get initial message from URL query parameters
+  useEffect(() => {
+    const message = searchParams.get('message');
+    if (message) {
+      setInitialMessage(decodeURIComponent(message));
+    }
+  }, [searchParams]);
 
   const toggleSidebar = () => {
     setIsSidebarExpanded(!isSidebarExpanded);
@@ -82,6 +98,25 @@ export default function ConvoPage() {
 
   const toggleReasoning = () => {
     setIsReasoningExpanded(!isReasoningExpanded);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (message.trim() && !isSubmitting) {
+      setIsSubmitting(true);
+      // Set the new user message and show response
+      setNewUserMessage(message.trim());
+      setShowNewResponse(true);
+      setMessage(""); // Clear input after sending
+      setIsSubmitting(false);
+      
+      // Auto-scroll to bottom after a short delay to ensure content is rendered
+      setTimeout(() => {
+        if (scrollContainerRef.current) {
+          scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
+        }
+      }, 100);
+    }
   };
 
   return (
@@ -137,16 +172,18 @@ export default function ConvoPage() {
                 {/* Chat Messages */}
                 <div className="flex flex-col gap-5 items-end w-full">
                 {/* User Message */}
-                <div className="flex flex-col gap-2.5 items-end w-[471px] max-w-full">
-                  <div className="bg-[#222222] h-[79px] rounded-[12px] w-full p-5 flex items-center">
-                    <p className="text-white text-[16px] font-normal leading-normal">
-                      explain me in simple points to start a small product based startup
-                    </p>
+                {initialMessage && (
+                  <div className="flex flex-col gap-2.5 items-end w-[471px] max-w-full">
+                    <div className="bg-[#222222] h-auto min-h-[79px] rounded-[12px] w-full p-5 flex items-center">
+                      <p className="text-white text-[16px] font-normal leading-normal">
+                        {initialMessage}
+                      </p>
+                    </div>
+                    <div className="h-[23px] w-[47px]">
+                      <Image src="/assets/9b92b08567bb06ffa9496a22e73251b7a42cb630.svg" alt="User timestamp" width={47} height={23} className="w-full h-full" />
+                    </div>
                   </div>
-                  <div className="h-[23px] w-[47px]">
-                    <Image src="/assets/9b92b08567bb06ffa9496a22e73251b7a42cb630.svg" alt="User timestamp" width={47} height={23} className="w-full h-full" />
-                  </div>
-                </div>
+                )}
 
                 {/* AI Response */}
                 <div className="flex flex-col gap-[34px] items-start w-full">
@@ -281,6 +318,112 @@ export default function ConvoPage() {
                     </div>
                   </div>
                 </div>
+
+                {/* New User Message and AI Response */}
+                {showNewResponse && newUserMessage && (
+                  <>
+                    {/* New User Message */}
+                    <div className="flex flex-col gap-2.5 items-end w-full">
+                      <div className="flex flex-col gap-2.5 items-end w-[471px] max-w-full">
+                        <div className="bg-[#222222] h-auto min-h-[79px] rounded-[12px] w-full p-5 flex items-center">
+                          <p className="text-white text-[16px] font-normal leading-normal">
+                            {newUserMessage}
+                          </p>
+                        </div>
+                        <div className="h-[23px] w-[47px]">
+                          <Image src="/assets/9b92b08567bb06ffa9496a22e73251b7a42cb630.svg" alt="User timestamp" width={47} height={23} className="w-full h-full" />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* New AI Response */}
+                    <div className="flex flex-col gap-[34px] items-start w-full">
+                      {/* Reasoning Section - Conditional Background */}
+                      <div className="rounded-[12px] w-full bg-transparent">
+                        {/* Reasoning Button - Always Visible */}
+                        <div className="p-5 pb-0">
+                          <button 
+                            className="bg-[#403d3d] rounded-[8px] p-[10px] flex items-center justify-between w-[158px] hover:bg-[#4a4747] transition-all duration-300 ease-out focus:outline-none focus:ring-2 focus:ring-white/20 border border-transparent"
+                            aria-label="Reasoning section"
+                          >
+                            <span className="text-white text-[16px] font-normal">Reasoning</span>
+                            <div 
+                              className="w-4 h-3 flex items-center justify-center"
+                              style={{
+                                transform: 'rotate(315deg)',
+                                transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                              }}
+                            >
+                              <Image src="/assets/f336b203bf6c218af18453ce2315e93526c43331.svg" alt="Toggle" width={12} height={12} />
+                            </div>
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* AI Message Content */}
+                      <div className="flex flex-col gap-1.5 items-start w-full">
+                        <div className="bg-[#222222] rounded-[10px] w-full p-[27px] pt-4">
+                          <div className="text-white text-[16px] font-normal leading-[30px]">
+                            <p className="mb-0">
+                              Sure 👍 Here&apos;s a <span className="font-bold">short & simple version:</span>
+                            </p>
+                            <p className="mb-0">&nbsp;</p>
+                            <ol className="list-decimal mb-0 ml-6">
+                              <li className="mb-0">
+                                <span className="font-bold">Find a proble</span>m people face.
+                              </li>
+                              <li className="mb-0">
+                                <span className="font-bold">Validate the ide</span>a – check if others want it.
+                              </li>
+                              <li className="mb-0">
+                                <span className="font-bold">Build a simple MV</span>P (basic version of product).
+                              </li>
+                              <li className="mb-0">
+                                <span className="font-bold">Launch sma</span>ll to early users.
+                              </li>
+                              <li className="mb-0">
+                                <span className="font-bold">Collect feedbac</span>k and improve.
+                              </li>
+                              <li className="mb-0">
+                                <span className="font-bold">Decide revenue mode</span>l (subscription, one-time, etc.).
+                              </li>
+                              <li className="mb-0">
+                                <span className="font-bold">Market cheapl</span>y via social media & communities.
+                              </li>
+                              <li className="mb-0">
+                                <span className="font-bold">Iterate & grow</span> step by step.
+                              </li>
+                            </ol>
+                            <p className="mb-0">&nbsp;</p>
+                            <p className="mb-0">
+                              👉 Formula: <span className="font-bold">Problem → Validate → MVP → Launch → Feedback → Improve → Grow.</span>
+                            </p>
+                            <p className="mb-0">&nbsp;</p>
+                            <p className="mb-0">Want me to make an ultra-short 1-line version (like a startup mantra)?</p>
+                          </div>
+
+                          {/* Source Attribution */}
+                          <div className="flex gap-[5px] items-end justify-end mt-4">
+                            <span className="text-[#858484] text-[14px] font-light">Source</span>
+                            <button 
+                              onClick={toggleSourcesPanel}
+                              className="flex items-center hover:opacity-80 transition-opacity"
+                            >
+                              <Image src="/assets/b20458d1f77516b8b42331fe1b8903745b898b8e.png" alt="Source 1" width={15} height={15} className="mr-[-5px]" />
+                              <Image src="/assets/3bb4be32b505c71f4b54097e6464260a76c92a7e.png" alt="Source 2" width={15} height={15} className="mr-[-5px]" />
+                              <Image src="/assets/cced42a2ea906dfd1a2c96a7edd2cb587fbcaa4c.png" alt="Source 3" width={15} height={15} className="mr-[-5px]" />
+                            </button>
+                          </div>
+                        </div>
+                        
+                        {/* AI Response Timestamp */}
+                        <div className="h-[23px] w-[78px]">
+                          <Image src="/assets/661fccc37c4590d45a3e7486262613fb67247d95.svg" alt="AI timestamp" width={78} height={23} className="w-full h-full" />
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
                 </div>
               </div>
             </div>
@@ -307,23 +450,45 @@ export default function ConvoPage() {
 
           {/* Fixed Input Area at Bottom */}
           <div className="flex-shrink-0 px-3 sm:px-4 lg:px-6 pb-8 md:pb-6 safe-area-inset-bottom">
-            <div className="bg-[#413e3e] h-[53px] rounded-[40px] w-[705px] max-w-full mx-auto relative">
+            <form onSubmit={handleSubmit} className="bg-[#413e3e] h-[53px] rounded-[40px] w-[705px] max-w-full mx-auto relative">
               <div className="h-[53px] overflow-clip relative w-full">
                 {/* Left icon */}
-                <button className="absolute left-1 size-[45px] top-1 cursor-pointer">
+                <button 
+                  type="button"
+                  className="absolute left-1 size-[45px] top-1 cursor-pointer hover:opacity-80 transition-opacity"
+                >
                   <Image src="/assets/318d58d830b9b38d9b0599b5ddf33d109fb41910.svg" alt="Add" width={45} height={45} className="block max-w-none size-full" />
                 </button>
                 
-                {/* Right icon */}
-                <div className="absolute right-1 size-[45px] top-1">
-                  <Image src="/assets/54212aa38c8d48f27cff07bb9a2a1bbfe77ab63f.svg" alt="Send" width={45} height={45} className="block max-w-none size-full" />
-                </div>
+                {/* Right icon - now a submit button */}
+                <button 
+                  type="submit"
+                  className="absolute right-1 size-[45px] top-1 cursor-pointer hover:opacity-80 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={!message.trim() || isSubmitting}
+                >
+                  <Image 
+                    src="/assets/54212aa38c8d48f27cff07bb9a2a1bbfe77ab63f.svg" 
+                    alt={isSubmitting ? "Sending..." : "Send"} 
+                    width={45} 
+                    height={45} 
+                    className={`block max-w-none size-full ${isSubmitting ? 'animate-pulse' : ''}`}
+                  />
+                </button>
                 
-                {/* Input text */}
+                {/* Input text - now controlled */}
                 <div className="absolute left-[62px] right-[120px] top-1/2 -translate-y-1/2">
-                  <span className="text-[#858484] text-[14px] font-normal">
-                    Type your prompt here
-                  </span>
+                  <input 
+                    type="text" 
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    placeholder="Type your prompt here" 
+                    className="w-full bg-transparent text-white placeholder-[#858484] text-[14px] outline-none border-none overflow-hidden text-ellipsis"
+                    style={{ 
+                      fontFamily: 'DM Sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                      fontWeight: 400
+                    }}
+                    maxLength={500}
+                  />
                 </div>
                 
                 {/* Microphone icon */}
@@ -334,7 +499,7 @@ export default function ConvoPage() {
               
               {/* White border */}
               <div className="absolute border border-solid border-white inset-0 pointer-events-none rounded-[40px]" />
-            </div>
+            </form>
           </div>
         </div>
       </div>

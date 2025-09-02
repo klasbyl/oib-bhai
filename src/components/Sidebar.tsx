@@ -6,9 +6,13 @@ import { useCustomScrollbar } from "@/hooks/use-custom-scrollbar";
 import { ASSETS, MOCK_CHAT_HISTORY, Z_INDEX } from "@/lib/constants";
 import { cn } from "@/lib/helpers";
 import type { SidebarProps } from "@/types";
+import { useRouter } from "next/navigation";
+import ProfileMenu from "./ProfileMenu";
 
 export default function Sidebar({ isExpanded, onToggle, onClose }: SidebarProps) {
   const sidebarRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const {
     scrollThumbTop,
     scrollThumbHeight,
@@ -17,6 +21,19 @@ export default function Sidebar({ isExpanded, onToggle, onClose }: SidebarProps)
     handleScrollbarMouseDown,
     handleScrollbarTrackClick,
   } = useCustomScrollbar();
+
+  const handleNewChat = () => {
+    // Navigate to homepage for new chat
+    router.push('/');
+  };
+
+  const toggleProfileMenu = () => {
+    setIsProfileMenuOpen(!isProfileMenuOpen);
+  };
+
+  const closeProfileMenu = () => {
+    setIsProfileMenuOpen(false);
+  };
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -54,10 +71,29 @@ export default function Sidebar({ isExpanded, onToggle, onClose }: SidebarProps)
       className={`bg-[#1f1f1f] mobile-fit-screen overflow-hidden ${
         isExpanded 
           ? 'w-[300px] fixed z-50 md:relative md:z-auto top-2 left-2 right-2 bottom-2 md:inset-auto md:m-2 md:ml-2 md:mr-1 rounded-[20px] md:h-[calc(100vh-16px)]' 
-          : 'w-[80px] md:w-[72px] min-w-[80px] md:min-w-[72px] md:m-2 m-2 h-[calc(100vh-32px)] md:h-[calc(100vh-16px)] rounded-[20px]'
+          : 'w-[80px] md:w-[72px] min-w-[80px] md:min-w-[72px] md:m-2 m-2 h-[calc(100vh-32px)] md:h-[calc(100vh-16px)] rounded-[20px] cursor-pointer'
       } flex flex-col relative`}
       style={{
         transition: 'width 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+      }}
+      onClick={(e) => {
+        // Only expand if clicking on the container itself, not on buttons or interactive elements
+        if (!isExpanded && !isProfileMenuOpen) {
+          // Check if the click target is the sidebar container or a non-interactive child
+          const target = e.target as HTMLElement;
+          
+          // Don't expand if clicking on interactive elements
+          if (target.tagName === 'BUTTON' || 
+              target.tagName === 'INPUT' || 
+              target.closest('button') || 
+              target.closest('input') || 
+              target.closest('[data-sidebar-toggle]')) {
+            return;
+          }
+          
+          // Expand the sidebar
+          onToggle();
+        }
       }}
     >
       {/* Header Section */}
@@ -127,7 +163,7 @@ export default function Sidebar({ isExpanded, onToggle, onClose }: SidebarProps)
           style={{
             transition: 'width 0.4s cubic-bezier(0.4, 0, 0.2, 1), padding 0.4s cubic-bezier(0.4, 0, 0.2, 1), gap 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
           }}
-          onClick={isExpanded ? undefined : onToggle}
+          onClick={handleNewChat}
           aria-label="New Chat"
         >
           <Image src={ASSETS.icons.newChat} alt="New Chat" width={12} height={12} className="flex-shrink-0" />
@@ -340,20 +376,23 @@ export default function Sidebar({ isExpanded, onToggle, onClose }: SidebarProps)
         
         {/* Profile Section */}
         <div 
-          className={`cursor-pointer hover:opacity-80 transition-opacity pb-4 safe-area-inset-bottom ${
+          className={`cursor-pointer hover:opacity-80 transition-opacity pb-4 safe-area-inset-bottom relative ${
             isExpanded ? 'px-5 w-full' : 'px-0'
           }`} 
-          onClick={onToggle}
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleProfileMenu();
+          }}
           style={{
             transition: 'padding 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
           }}
           role="button"
-          aria-label={isExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
+          aria-label="Open profile menu"
           tabIndex={0}
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault();
-              onToggle();
+              toggleProfileMenu();
             }
           }}
         >
@@ -390,6 +429,13 @@ export default function Sidebar({ isExpanded, onToggle, onClose }: SidebarProps)
           </div>
         </div>
       </div>
+
+      {/* Profile Menu */}
+      <ProfileMenu 
+        isOpen={isProfileMenuOpen} 
+        onClose={closeProfileMenu} 
+        isSidebarExpanded={isExpanded}
+      />
     </div>
   );
 }

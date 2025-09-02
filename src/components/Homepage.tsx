@@ -3,6 +3,8 @@
 import Image from "next/image";
 import { useState } from "react";
 import Sidebar from "@/components/Sidebar";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 // Asset imports
 const imgAsset12 = "/assets/640b20a128648296e24f7ce09fa56b28396d42ce.png";
@@ -46,6 +48,9 @@ const CategoryButton: React.FC<CategoryButtonProps> = ({
 
 export default function Homepage() {
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
+  const [message, setMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
 
   const toggleSidebar = () => {
     setIsSidebarExpanded(!isSidebarExpanded);
@@ -53,6 +58,20 @@ export default function Homepage() {
 
   const closeSidebar = () => {
     setIsSidebarExpanded(false);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (message.trim() && !isSubmitting) {
+      setIsSubmitting(true);
+      // Navigate to convo page with the message as a query parameter
+      router.push(`/convo?message=${encodeURIComponent(message.trim())}`);
+    }
+  };
+
+  const handleCategoryClick = (category: string) => {
+    // Navigate to convo page with the category as a message
+    router.push(`/convo?message=${encodeURIComponent(`Help me with ${category}`)}`);
   };
 
   return (
@@ -73,10 +92,21 @@ export default function Homepage() {
             <Image src={imgAsset12} alt="Logo" width={45} height={45} className="w-full h-full object-cover" />
           </div>
           
-          {/* Upgrade button */}
-          <div className="bg-white rounded-[12px] px-3 sm:px-4 py-2 sm:py-2.5 flex items-center gap-2 hover:bg-gray-100 transition-colors cursor-pointer">
-            <Image src={imgVector5} alt="Upgrade icon" width={19} height={18} />
-            <span className="text-[#222222] font-medium text-sm sm:text-base">Upgrade</span>
+          {/* Right side buttons */}
+          <div className="flex items-center gap-3">
+            {/* Login button */}
+            <Link 
+              href="/login"
+              className="bg-[#504e4e] hover:bg-[#595858] rounded-[12px] px-4 py-2.5 flex items-center gap-2 transition-colors text-white font-medium text-sm"
+            >
+              <span>Login</span>
+            </Link>
+            
+            {/* Upgrade button */}
+            <div className="bg-white rounded-[12px] px-3 sm:px-4 py-2 sm:py-2.5 flex items-center gap-2 hover:bg-gray-100 transition-colors cursor-pointer">
+              <Image src={imgVector5} alt="Upgrade icon" width={19} height={18} />
+              <span className="text-[#222222] font-medium text-sm sm:text-base">Upgrade</span>
+            </div>
           </div>
         </div>
 
@@ -92,22 +122,34 @@ export default function Homepage() {
             </div>
 
             {/* Search Input */}
-            <div className="bg-[#413e3e] rounded-[40px] h-[53px] mb-3 sm:mb-4 lg:mb-6 relative flex-shrink-0">
+            <form onSubmit={handleSubmit} className="bg-[#413e3e] rounded-[40px] h-[53px] mb-3 sm:mb-4 lg:mb-6 relative flex-shrink-0">
               <div className="h-[53px] overflow-clip relative w-full">
                 {/* Left icon */}
                 <div className="absolute left-1 size-[45px] top-1">
                   <Image src={imgFrame19} alt="Search" width={45} height={45} className="block max-w-none size-full" />
                 </div>
                 
-                {/* Right icon */}
-                <div className="absolute right-1 size-[45px] top-1 cursor-pointer hover:opacity-80 transition-opacity">
-                  <Image src={imgFrame20} alt="Send" width={45} height={45} className="block max-w-none size-full" />
-                </div>
+                {/* Right icon - now a submit button */}
+                <button 
+                  type="submit"
+                  className="absolute right-1 size-[45px] top-1 cursor-pointer hover:opacity-80 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={!message.trim() || isSubmitting}
+                >
+                  <Image 
+                    src={imgFrame20} 
+                    alt={isSubmitting ? "Sending..." : "Send"} 
+                    width={45} 
+                    height={45} 
+                    className={`block max-w-none size-full ${isSubmitting ? 'animate-pulse' : ''}`}
+                  />
+                </button>
                 
-                {/* Input text - now writable */}
+                {/* Input text - now controlled */}
                 <div className="absolute left-[62px] right-[120px] top-1/2 -translate-y-1/2">
                   <input 
                     type="text" 
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
                     placeholder="Type your prompt here" 
                     className="w-full bg-transparent text-white placeholder-[#858484] text-[14px] outline-none border-none overflow-hidden text-ellipsis"
                     style={{ 
@@ -126,17 +168,17 @@ export default function Homepage() {
               
               {/* White border */}
               <div className="absolute border border-solid border-white inset-0 pointer-events-none rounded-[40px]" />
-            </div>
+            </form>
 
             {/* Category Selection */}
             <div className="text-center flex-shrink-0">
               <h2 className="text-white text-sm sm:text-base mb-2 sm:mb-3 lg:mb-4">Are you looking for?</h2>
               <div className="flex flex-wrap justify-center gap-1.5 sm:gap-2 lg:gap-3">
-                <CategoryButton icon={imgVector} label="Fintech" />
-                <CategoryButton icon={imgVector1} label="E-commerce" />
-                <CategoryButton icon={imgVector2} label="SaaS" />
-                <CategoryButton icon={imgGroup5} label="Legal Help" />
-                <CategoryButton icon={imgVector3} label="More" isActive />
+                <CategoryButton icon={imgVector} label="Fintech" onClick={() => handleCategoryClick("Fintech")} />
+                <CategoryButton icon={imgVector1} label="E-commerce" onClick={() => handleCategoryClick("E-commerce")} />
+                <CategoryButton icon={imgVector2} label="SaaS" onClick={() => handleCategoryClick("SaaS")} />
+                <CategoryButton icon={imgGroup5} label="Legal Help" onClick={() => handleCategoryClick("Legal Help")} />
+                <CategoryButton icon={imgVector3} label="More" isActive onClick={() => handleCategoryClick("general assistance")} />
               </div>
             </div>
           </div>

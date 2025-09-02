@@ -1,0 +1,15 @@
+<svg preserveAspectRatio="none" width="100%" height="100%" overflow="visible" style="display: block;" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Table" clip-path="url(#clip0_11_84)">
+<path id="Vector" d="M15 18H3C1.35 18 0 16.65 0 15V3.75C0 3.3 0.3 3 0.75 3H17.25C17.7 3 18 3.3 18 3.75V15C18 16.65 16.65 18 15 18ZM1.5 4.5V15C1.5 15.825 2.175 16.5 3 16.5H15C15.825 16.5 16.5 15.825 16.5 15V4.5H1.5Z" fill="var(--fill-0, white)"/>
+<path id="Vector_2" d="M17.25 3.75H0.75V3C0.75 1.725 1.725 0.75 3 0.75H15C16.275 0.75 17.25 1.725 17.25 3V3.75Z" fill="var(--fill-0, white)"/>
+<path id="Vector_3" d="M17.25 4.5H0.75C0.3 4.5 0 4.2 0 3.75V3C0 1.35 1.35 0 3 0H15C16.65 0 18 1.35 18 3V3.75C18 4.2 17.7 4.5 17.25 4.5ZM1.5 3H16.5C16.5 2.175 15.825 1.5 15 1.5H3C2.175 1.5 1.5 2.175 1.5 3Z" fill="var(--fill-0, white)"/>
+<path id="Vector_4" d="M5.25 18C4.8 18 4.5 17.7 4.5 17.25V3.75C4.5 3.3 4.8 3 5.25 3C5.7 3 6 3.3 6 3.75V17.25C6 17.7 5.7 18 5.25 18Z" fill="var(--fill-0, white)"/>
+<path id="Vector_5" d="M17.25 9H0.75C0.3 9 0 8.7 0 8.25C0 7.8 0.3 7.5 0.75 7.5H17.25C17.7 7.5 18 7.8 18 8.25C18 8.7 17.7 9 17.25 9Z" fill="var(--fill-0, white)"/>
+<path id="Vector_6" d="M17.25 13.5H0.75C0.3 13.5 0 13.2 0 12.75C0 12.3 0.3 12 0.75 12H17.25C17.7 12 18 12.3 18 12.75C18 13.2 17.7 13.5 17.25 13.5Z" fill="var(--fill-0, white)"/>
+</g>
+<defs>
+<clipPath id="clip0_11_84">
+<rect width="18" height="18" fill="white"/>
+</clipPath>
+</defs>
+</svg>
