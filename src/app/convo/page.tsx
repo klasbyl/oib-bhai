@@ -1,4 +1,10 @@
-import ConvoPage from "@/components/ConvoPage";
+import dynamic from "next/dynamic";
+import LoadingSpinner from "@/components/LoadingSpinner";
+
+const ConvoPage = dynamic(() => import("@/components/ConvoPage"), {
+  loading: () => <LoadingSpinner />,
+  ssr: false
+});
 
 export const metadata = {
   title: "Conversation - One In a Billion",
