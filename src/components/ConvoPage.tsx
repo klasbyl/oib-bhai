@@ -10,43 +10,9 @@ import { useCustomScrollbar } from "@/hooks/use-custom-scrollbar";
 
 // Asset imports
 const imgAsset12 = "/assets/640b20a128648296e24f7ce09fa56b28396d42ce.png";
-const imgFrame19 = "/assets/d09129f6602709bb5c29e32c765ade6258442ae8.svg";
-const imgFrame20 = "/assets/54212aa38c8d48f27cff07bb9a2a1bbfe77ab63f.svg";
-const imgVector4 = "/assets/1ac5dd6ed9e48c5888923a563979c8f56b46627c.svg";
 const imgVector5 = "/assets/08c401b681a7f06ff91478a7a2727f1e2d8a5bb6.svg";
-const imgVector = "/assets/5eceb407d33a6328409e0fe726d4f00769fc9e08.svg";
-const imgVector1 = "/assets/76ded5aa267c13e8c0d321d76b88c25e1a58665a.svg";
-const imgVector2 = "/assets/b0279ff2d6d8cdd3331384028d384ff7af34ac5f.svg";
-const imgGroup5 = "/assets/a74ec3a64363f6186a4db7a2ab988fb85b4d5e17.svg";
-const imgVector3 = "/assets/ef3b19fc5dfbb30127eeb376a8538e5ca93783d2.svg";
 
-interface CategoryButtonProps {
-  icon: string;
-  label: string;
-  isActive?: boolean;
-  onClick?: () => void;
-}
 
-const CategoryButton: React.FC<CategoryButtonProps> = ({ 
-  icon, 
-  label, 
-  isActive = false, 
-  onClick 
-}) => (
-  <button 
-    onClick={onClick}
-    className={`
-      h-[38px] px-4 py-2.5 flex items-center gap-3 rounded-[20px] transition-all duration-200
-      ${isActive 
-        ? 'bg-white text-[#262525] hover:bg-gray-100' 
-        : 'bg-[#504e4e] text-white hover:bg-[#595858]'
-      }
-    `}
-  >
-    <Image src={icon} alt={label} width={16} height={16} className="w-4 h-4" />
-    <span className="text-[14px] font-normal">{label}</span>
-  </button>
-);
 
 export default function ConvoPage() {
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
@@ -60,12 +26,8 @@ export default function ConvoPage() {
   const searchParams = useSearchParams();
   
   const {
-    scrollThumbTop,
-    scrollThumbHeight,
     scrollContainerRef,
     handleScroll,
-    handleScrollbarMouseDown,
-    handleScrollbarTrackClick,
   } = useCustomScrollbar();
 
   // Get initial message from URL query parameters

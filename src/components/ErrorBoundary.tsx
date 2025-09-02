@@ -1,7 +1,6 @@
 "use client";
 
 import React from 'react';
-import type { AppError } from '@/types';
 
 interface ErrorBoundaryState {
   hasError: boolean;

@@ -3,8 +3,7 @@
 import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
 import { useCustomScrollbar } from "@/hooks/use-custom-scrollbar";
-import { ASSETS, MOCK_CHAT_HISTORY, Z_INDEX } from "@/lib/constants";
-import { cn } from "@/lib/helpers";
+import { ASSETS, MOCK_CHAT_HISTORY } from "@/lib/constants";
 import type { SidebarProps } from "@/types";
 import { useRouter } from "next/navigation";
 import ProfileMenu from "./ProfileMenu";

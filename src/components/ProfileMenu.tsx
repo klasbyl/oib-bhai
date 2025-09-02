@@ -20,10 +20,9 @@ const hideScrollbarStyles = `
 interface ProfileMenuProps {
   isOpen: boolean;
   onClose: () => void;
-  isSidebarExpanded?: boolean;
 }
 
-export default function ProfileMenu({ isOpen, onClose, isSidebarExpanded = true }: ProfileMenuProps) {
+export default function ProfileMenu({ isOpen, onClose }: ProfileMenuProps) {
   const [isAccountsOpen, setIsAccountsOpen] = useState(false);
   const [isGeneralOpen, setIsGeneralOpen] = useState(false);
   const [isSystemOpen, setIsSystemOpen] = useState(false);

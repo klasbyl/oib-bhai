@@ -68,7 +68,7 @@ export default function SystemPopup({ isOpen, onClose }: SystemPopupProps) {
                   Custom System Message
                 </h2>
                 <p className="text-[#858484] text-[14px] font-normal font-['DM_Sans',sans-serif]">
-                  Set a custom system message that will be sent to the AI at the beginning of each conversation. This helps define the AI's role, behaviour, and context of all your chats
+                  Set a custom system message that will be sent to the AI at the beginning of each conversation. This helps define the AI&apos;s role, behaviour, and context of all your chats
                 </p>
               </div>
               
