@@ -17,6 +17,7 @@ export function useAIChat(threadId?: string): UseAIChatReturn {
   const [currentThread, setCurrentThread] = useState<ChatThread | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
+  const [isReasoning, setIsReasoning] = useState(false);
   const [error, setError] = useState<AIError | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -43,11 +44,12 @@ export function useAIChat(threadId?: string): UseAIChatReturn {
       abortControllerRef.current = null;
     }
     setIsStreaming(false);
+    setIsReasoning(false);
     setIsLoading(false);
   }, []);
 
   // Send message function
-  const sendMessage = useCallback(async (content: string) => {
+  const sendMessage = useCallback(async (content: string, model: 'grok' | 'gpt-oss' = 'grok') => {
     if (!content.trim() || !currentThread) return;
 
     // Clear previous error
@@ -76,6 +78,7 @@ export function useAIChat(threadId?: string): UseAIChatReturn {
 
     setMessages(prev => [...prev, aiMessage]);
     setIsStreaming(true);
+    setIsReasoning(false); // Start with reasoning collapsed
 
     try {
       // Create abort controller for cancellation
@@ -84,10 +87,13 @@ export function useAIChat(threadId?: string): UseAIChatReturn {
       // Stream the AI response
       let fullContent = '';
       let reasoning = '';
+      let hasStartedReasoning = false;
+      let hasStartedResponse = false;
 
       const stream = aiChatService.streamMessage({
         message: content.trim(),
         threadId: currentThread.id,
+        model,
       });
 
       for await (const chunk of stream) {
@@ -123,14 +129,25 @@ export function useAIChat(threadId?: string): UseAIChatReturn {
           chatManager.addMessage(currentThread.id, userMessage);
           chatManager.addMessage(currentThread.id, finalMessage);
 
+          // Reset reasoning state
+          setIsReasoning(false);
           break;
         } else {
-          // Update streaming content
-          if (chunk.content) {
-            fullContent += chunk.content;
-          }
-          if (chunk.reasoning) {
+          // Handle reasoning vs content streaming
+          if (chunk.reasoning && !hasStartedResponse) {
+            if (!hasStartedReasoning) {
+              hasStartedReasoning = true;
+              setIsReasoning(true); // Expand reasoning section when reasoning starts
+            }
             reasoning += chunk.reasoning;
+          }
+
+          if (chunk.content) {
+            if (!hasStartedResponse) {
+              hasStartedResponse = true;
+              setIsReasoning(false); // Collapse reasoning when final response starts
+            }
+            fullContent += chunk.content;
           }
 
           setMessages(prev => prev.map(msg =>
@@ -239,6 +256,7 @@ export function useAIChat(threadId?: string): UseAIChatReturn {
     currentThread,
     isLoading,
     isStreaming,
+    isReasoning,
     error,
     sendMessage,
     createNewThread,

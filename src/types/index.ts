@@ -63,6 +63,7 @@ export interface AIRequest {
   message: string;
   threadId?: string;
   context?: string;
+  model?: 'grok' | 'gpt-oss';
 }
 
 export interface AIResponse {
@@ -112,8 +113,9 @@ export interface UseAIChatReturn {
   currentThread: ChatThread | null;
   isLoading: boolean;
   isStreaming: boolean;
+  isReasoning: boolean;
   error: AIError | null;
-  sendMessage: (content: string) => Promise<void>;
+  sendMessage: (content: string, model?: 'grok' | 'gpt-oss') => Promise<void>;
   createNewThread: () => void;
   switchThread: (threadId: string) => void;
   clearMessages: () => void;

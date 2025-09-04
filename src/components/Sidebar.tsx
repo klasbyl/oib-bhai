@@ -80,16 +80,20 @@ export default function Sidebar({ isExpanded, onToggle, onClose }: SidebarProps)
         if (!isExpanded && !isProfileMenuOpen) {
           // Check if the click target is the sidebar container or a non-interactive child
           const target = e.target as HTMLElement;
-          
+
           // Don't expand if clicking on interactive elements
-          if (target.tagName === 'BUTTON' || 
-              target.tagName === 'INPUT' || 
-              target.closest('button') || 
-              target.closest('input') || 
-              target.closest('[data-sidebar-toggle]')) {
+          if (target.tagName === 'BUTTON' ||
+              target.tagName === 'INPUT' ||
+              target.tagName === 'H1' ||
+              target.closest('button') ||
+              target.closest('input') ||
+              target.closest('h1') ||
+              target.closest('[data-sidebar-toggle]') ||
+              target.closest('[aria-label="Expand sidebar"]') ||
+              target.closest('[aria-label="Collapse sidebar"]')) {
             return;
           }
-          
+
           // Expand the sidebar
           onToggle();
         }
@@ -105,16 +109,19 @@ export default function Sidebar({ isExpanded, onToggle, onClose }: SidebarProps)
         }}
       >
         {/* Collapsed state: Home icon */}
-        <div 
+        <div
           className={`flex items-center justify-center cursor-pointer hover:opacity-80 ${
-            isExpanded 
-              ? 'w-0 h-0 opacity-0 overflow-hidden' 
+            isExpanded
+              ? 'w-0 h-0 opacity-0 overflow-hidden'
               : 'w-10 h-10 opacity-100'
           }`}
           style={{
             transition: 'opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1), height 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
           }}
-          onClick={onToggle}
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggle();
+          }}
           aria-label="Expand sidebar"
         >
           <Image src={ASSETS.icons.home} alt="Home" width={25} height={25} />
@@ -133,13 +140,19 @@ export default function Sidebar({ isExpanded, onToggle, onClose }: SidebarProps)
         >
           <h1
             className="text-white text-[28px] font-semibold whitespace-nowrap cursor-pointer hover:opacity-80 transition-opacity"
-            onClick={onToggle}
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggle();
+            }}
             aria-label="Collapse sidebar"
           >
             My Chats
           </h1>
-          <button 
-            onClick={onToggle}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggle();
+            }}
             data-sidebar-toggle
             // className="w-8 h-8 bg-[#504e4e] rounded-[8px] flex items-center justify-center hover:bg-[#595858] transition-colors focus:outline-none focus:ring-2 focus:ring-white/20 ml-4"
             aria-label="Collapse sidebar"

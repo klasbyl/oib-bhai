@@ -164,6 +164,7 @@ export class AIChatService implements ChatService {
           message: request.message,
           context: request.context,
           stream: true,
+          model: request.model || 'grok',
         }),
       });
 

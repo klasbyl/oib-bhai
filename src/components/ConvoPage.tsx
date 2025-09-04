@@ -30,6 +30,7 @@ export default function ConvoPage() {
   const [isSourcesPanelOpen, setIsSourcesPanelOpen] = useState(false);
   const [expandedReasoningMessages, setExpandedReasoningMessages] = useState<Set<string>>(new Set());
   const [initialMessage, setInitialMessage] = useState<string>("");
+  const [selectedModel, setSelectedModel] = useState<'grok' | 'gpt-oss'>('grok');
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -38,9 +39,15 @@ export default function ConvoPage() {
     messages,
     isLoading,
     isStreaming,
+    isReasoning,
     error,
     sendMessage,
   } = useAIChat();
+
+  // Create a wrapper function to include the model parameter
+  const handleSendMessage = useCallback(async (content: string) => {
+    await sendMessage(content, selectedModel);
+  }, [sendMessage, selectedModel]);
   
   const {
     scrollContainerRef,
@@ -110,6 +117,21 @@ export default function ConvoPage() {
   const messageList = useMemo(() => messages, [messages]);
 
   /**
+   * Auto-scroll to bottom when new messages or streaming content arrives
+   */
+  useEffect(() => {
+    if (scrollContainerRef.current && (messages.length > 0 || isStreaming)) {
+      const container = scrollContainerRef.current;
+      // Use setTimeout to ensure DOM has updated
+      setTimeout(() => {
+        if (container) {
+          container.scrollTop = container.scrollHeight;
+        }
+      }, 10);
+    }
+  }, [messages, isStreaming, scrollContainerRef]);
+
+  /**
    * Memoized error retry function
    * Retries the last user message when an error occurs
    */
@@ -160,10 +182,36 @@ export default function ConvoPage() {
             <Image src={ASSETS.images.logo} alt="Logo" width={45} height={45} className="w-full h-full object-cover" />
           </div>
 
-            {/* Upgrade button */}
-            <div className="bg-white rounded-[12px] px-3 sm:px-4 py-2 sm:py-2.5 flex items-center gap-2 hover:bg-gray-100 transition-colors cursor-pointer">
-              <Image src={ASSETS.icons.upgrade} alt="Upgrade icon" width={19} height={18} />
-              <span className="text-[#222222] font-medium text-sm sm:text-base">Upgrade</span>
+            {/* Model Toggle */}
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 bg-[#222222] rounded-lg p-1">
+                <button
+                  onClick={() => setSelectedModel('grok')}
+                  className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
+                    selectedModel === 'grok'
+                      ? 'bg-white text-black'
+                      : 'text-white/70 hover:text-white'
+                  }`}
+                >
+                  Grok
+                </button>
+                <button
+                  onClick={() => setSelectedModel('gpt-oss')}
+                  className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
+                    selectedModel === 'gpt-oss'
+                      ? 'bg-white text-black'
+                      : 'text-white/70 hover:text-white'
+                  }`}
+                >
+                  GPT OSS
+                </button>
+              </div>
+
+              {/* Upgrade button */}
+              <div className="bg-white rounded-[12px] px-3 sm:px-4 py-2 sm:py-2.5 flex items-center gap-2 hover:bg-gray-100 transition-colors cursor-pointer">
+                <Image src={ASSETS.icons.upgrade} alt="Upgrade icon" width={19} height={18} />
+                <span className="text-[#222222] font-medium text-sm sm:text-base">Upgrade</span>
+              </div>
             </div>
           </div>
 
@@ -196,15 +244,22 @@ export default function ConvoPage() {
                     )}
 
                     {/* Dynamic Messages */}
-                    {messageList.map((msg) => (
-                      <div key={msg.id} className={`flex flex-col gap-2.5 ${msg.type === 'user' ? 'items-end' : 'items-start'} ${msg.type === 'user' ? 'w-[471px] max-w-full' : 'w-full max-w-[786px]'}`}>
-                        <ChatMessage
-                          message={msg}
-                          isExpanded={expandedReasoningMessages.has(msg.id)}
-                          onToggleReasoning={toggleReasoning}
-                        />
-                      </div>
-                    ))}
+                    {messageList.map((msg) => {
+                      // Auto-expand reasoning for the currently streaming message
+                      const isCurrentlyStreaming = msg.isStreaming && isStreaming;
+                      const shouldAutoExpandReasoning = isCurrentlyStreaming && isReasoning;
+                      const isExpanded = Boolean(expandedReasoningMessages.has(msg.id) || shouldAutoExpandReasoning);
+
+                      return (
+                        <div key={msg.id} className={`flex flex-col gap-2.5 ${msg.type === 'user' ? 'items-end' : 'items-start'} ${msg.type === 'user' ? 'w-[471px] max-w-full' : 'w-full max-w-[786px]'}`}>
+                          <ChatMessage
+                            message={msg}
+                            isExpanded={isExpanded}
+                            onToggleReasoning={toggleReasoning}
+                          />
+                        </div>
+                      );
+                    })}
 
                     {/* Error Message */}
                     {error && (
@@ -220,7 +275,7 @@ export default function ConvoPage() {
 
             {/* Fixed Input Area at Bottom */}
             <ChatInput
-              onSubmit={sendMessage}
+              onSubmit={handleSendMessage}
               isLoading={isLoading}
               isStreaming={isStreaming}
               placeholder="Type your prompt here"

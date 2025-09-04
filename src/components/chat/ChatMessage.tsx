@@ -5,7 +5,7 @@
 
 "use client";
 
-import React, { memo } from 'react';
+import React, { memo, useRef } from 'react';
 import Image from 'next/image';
 import type { ChatMessage as ChatMessageType } from '@/types';
 import { ASSETS } from '@/lib/constants';
@@ -100,7 +100,22 @@ const ReasoningSection = memo<ReasoningSectionProps>(({
   message,
   isExpanded,
   onToggle
-}) => (
+}) => {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to bottom when new reasoning content arrives
+  React.useEffect(() => {
+    if (isExpanded && message.isStreaming && scrollRef.current && message.reasoning) {
+      // Use requestAnimationFrame for smoother scrolling
+      requestAnimationFrame(() => {
+        if (scrollRef.current) {
+          scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        }
+      });
+    }
+  }, [message.reasoning, isExpanded, message.isStreaming]);
+
+  return (
   <div
     className={`rounded-[12px] w-full transition-all duration-400 ease-out ${
       isExpanded ? 'bg-[#343333]' : 'bg-transparent'
@@ -151,13 +166,21 @@ const ReasoningSection = memo<ReasoningSectionProps>(({
     >
       <div className="p-5 pt-5 relative">
         <div
-          className="font-['DM_Sans:Regular',_sans-serif] font-normal leading-[0] text-[14px] text-white"
-          style={{ fontVariationSettings: "'opsz' 14" }}
+          ref={scrollRef}
+          className="font-['DM_Sans:Regular',_sans-serif] font-normal text-[14px] text-white transition-all duration-200 max-h-[300px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent"
+          style={{
+            fontVariationSettings: "'opsz' 14",
+            lineHeight: '1.5',
+            wordWrap: 'break-word',
+            overflowWrap: 'break-word'
+          }}
         >
           {message.reasoning ? (
-            <div className="whitespace-pre-wrap">{message.reasoning}</div>
+            <div className="whitespace-pre-wrap min-h-[20px]" style={{ wordWrap: 'break-word', overflowWrap: 'break-word' }}>
+              {message.reasoning}
+            </div>
           ) : (
-            <div className="text-[#858484] italic">
+            <div className="text-[#858484] italic min-h-[20px]" style={{ wordWrap: 'break-word', overflowWrap: 'break-word' }}>
               {message.isStreaming
                 ? "Analyzing your question and formulating a response..."
                 : "The AI is processing your request and will provide reasoning when available."
@@ -168,7 +191,8 @@ const ReasoningSection = memo<ReasoningSectionProps>(({
       </div>
     </div>
   </div>
-));
+  );
+});
 
 ReasoningSection.displayName = 'ReasoningSection';
 

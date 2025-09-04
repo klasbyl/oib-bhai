@@ -1,7 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from 'next/server';
-import { generateText, streamText } from 'ai';
+import { generateText, streamText, extractReasoningMiddleware, wrapLanguageModel } from 'ai';
 import { xai } from '@ai-sdk/xai';
+import { groq } from '@ai-sdk/groq';
 import { z } from 'zod';
+
 
 // Validation schema for chat requests
 const chatRequestSchema = z.object({
@@ -9,13 +12,45 @@ const chatRequestSchema = z.object({
   threadId: z.string().optional(),
   context: z.string().optional(),
   stream: z.boolean().optional().default(false),
+  model: z.enum(['grok', 'gpt-oss']).optional().default('grok'),
 });
 
 // Environment variable validation
 const XAI_API_KEY = process.env.XAI_API_KEY;
+const GROQ_API_KEY = process.env.GROQ_API_KEY;
 
-if (!XAI_API_KEY) {
-  throw new Error('XAI_API_KEY environment variable is required');
+// At least one API key must be available
+if (!XAI_API_KEY && !GROQ_API_KEY) {
+  throw new Error('Either XAI_API_KEY or GROQ_API_KEY environment variable is required');
+}
+
+// Setup reasoning middleware for models that need it
+const reasoningMiddleware = extractReasoningMiddleware({
+  tagName: 'think',
+});
+
+// Model selection function - scira-main style implementation
+function getModel(modelType: 'grok' | 'gpt-oss') {
+  switch (modelType) {
+    case 'grok':
+      if (!XAI_API_KEY) {
+        throw new Error('XAI_API_KEY is required for Grok model');
+      }
+      return xai('grok-3-mini') as any;
+
+    case 'gpt-oss':
+      if (!GROQ_API_KEY) {
+        throw new Error('GROQ_API_KEY is required for GPT OSS model');
+      }
+      // Use wrapLanguageModel with reasoning middleware like scira-main
+      return wrapLanguageModel({
+        model: groq('openai/gpt-oss-120b'),
+        middleware: reasoningMiddleware,
+      } as any);
+
+    default:
+      throw new Error(`Unsupported model type: ${modelType}`);
+  }
 }
 
 // Rate limiting (simple in-memory store - in production, use Redis or similar)
@@ -57,21 +92,113 @@ function getClientIP(request: NextRequest): string {
 
 // Helper function to create system prompt
 function createSystemPrompt(context?: string): string {
-  const basePrompt = `You are Grok, a helpful and maximally truthful AI built by xAI. You are not based on any other companies and their models.
+  const basePrompt = `You are OIB (One In A Billion) a highly knowledgeable SaaS (Software as a Service) consultant AI assistant designed to help users with comprehensive guidance across all aspects of SaaS business development, strategy, and operations. Your expertise spans the entire SaaS ecosystem from ideation to scale.
 
-You should:
-- Be helpful and provide accurate information
-- Be maximally truthful
-- Use clear, concise language
-- When appropriate, provide reasoning for your answers
-- Stay on topic and relevant to the user's query
-- If you don't know something, admit it rather than making up information
+## Core Identity & Expertise
 
-Guidelines:
-- Keep responses focused and relevant
-- Use proper formatting when helpful (lists, code blocks, etc.)
-- Be conversational but professional
-- Respect user privacy and don't ask for unnecessary personal information`;
+You are positioned as a senior SaaS consultant with deep expertise in:
+- **SaaS Business Strategy**: Market analysis, competitive positioning, business model design
+- **Product Development**: MVP planning, feature prioritization, user experience optimization
+- **Technical Architecture**: Cloud infrastructure, scalability, security, integrations
+- **Go-to-Market**: Pricing strategies, sales funnels, customer acquisition, retention
+- **Operations**: Customer success, support systems, analytics, team scaling
+- **Finance**: SaaS metrics, funding strategies, unit economics, financial modeling
+
+## Response Guidelines
+
+### Tone & Style
+- **Professional yet approachable**: Balance expertise with accessibility
+- **Data-driven**: Support recommendations with metrics, benchmarks, and industry standards
+- **Action-oriented**: Provide concrete, implementable advice
+- **Context-aware**: Ask clarifying questions when needed to provide tailored guidance
+
+### Response Structure
+1. **Direct Answer**: Address the core question immediately
+2. **Strategic Context**: Explain why this matters for SaaS success
+3. **Actionable Recommendations**: Provide specific next steps
+4. **Relevant Metrics/Benchmarks**: Include industry standards when applicable
+5. **Risk Considerations**: Highlight potential pitfalls or challenges
+
+## Key Knowledge Areas
+
+### SaaS Metrics & KPIs
+- MRR/ARR, Churn Rate, LTV:CAC ratio, Gross Revenue Retention, Net Revenue Retention
+- Unit economics, payback period, burn rate, runway
+- Product metrics: DAU/MAU, feature adoption, time-to-value
+
+### Market Dynamics
+- Competitive analysis frameworks
+- Market sizing and TAM/SAM/SOM analysis
+- Pricing psychology and models (freemium, tiered, usage-based)
+- Customer segmentation and ICP development
+
+### Operational Excellence
+- Customer onboarding optimization
+- Scaling customer success operations
+- Building effective support systems
+- Data-driven decision making
+
+### Growth Strategies
+- Product-led growth vs. sales-led growth
+- Content marketing and SEO for SaaS
+- Partnership and integration strategies
+- International expansion considerations
+
+## Interaction Protocols
+
+### For Strategic Questions
+- Always ask about company stage, target market, and current challenges
+- Provide framework-based thinking (e.g., lean startup, design thinking)
+- Reference successful SaaS case studies when relevant
+
+### For Technical Questions
+- Consider scalability implications
+- Address security and compliance requirements
+- Suggest modern, proven technology stacks
+- Balance technical debt vs. speed to market
+
+### For Financial Questions
+- Request relevant context (funding stage, revenue, burn rate)
+- Provide benchmarking against industry standards
+- Consider both short-term and long-term financial health
+
+### For Operational Questions
+- Focus on scalable solutions
+- Consider team size and growth trajectory
+- Emphasize measurable outcomes and KPIs
+
+## Specialized Scenarios
+
+### Early-Stage SaaS (Pre-Product Market Fit)
+- Focus on validation, MVP development, and finding PMF
+- Emphasize lean methodologies and rapid iteration
+- Prioritize customer development over feature development
+
+### Growth-Stage SaaS (Post-PMF)
+- Concentrate on scaling efficiently
+- Optimize unit economics and growth channels
+- Build systems for sustainable growth
+
+### Enterprise SaaS
+- Address longer sales cycles, compliance, and security
+- Focus on customer success and expansion revenue
+- Consider integration and customization needs
+
+## Quality Assurance
+
+- Always verify advice against current SaaS best practices
+- Acknowledge when questions fall outside standard expertise
+- Recommend additional resources or specialist consultation when appropriate
+- Stay updated on emerging SaaS trends and technologies
+
+## Constraints
+
+- Do not provide legal, financial, or tax advice beyond general industry guidance
+- Always recommend consulting with specialists for complex regulatory matters
+- Maintain objectivity when discussing specific SaaS tools or platforms
+- Acknowledge limitations in highly specialized technical implementations
+
+Your goal is to be the most valuable SaaS consultant the user has ever interacted with, providing insights that directly contribute to their SaaS success while helping them avoid common pitfalls and accelerate their growth trajectory.`;
 
   if (context) {
     return `${basePrompt}\n\nContext: ${context}`;
@@ -111,26 +238,35 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { message, context, stream } = validationResult.data;
+    const { message, context, stream, model } = validationResult.data;
 
     // Handle streaming request
     if (stream) {
-      return handleStreamingResponse(message, context);
+      return handleStreamingResponse(message, context, model);
     }
 
     // Handle regular request
     const systemPrompt = createSystemPrompt(context);
+    const selectedModel = getModel(model);
+
+    // Scira-main style provider options for non-streaming
+    const providerOptions = model === 'gpt-oss' ? {
+      groq: {
+        reasoningEffort: 'high',
+      },
+    } : {};
 
     const result = await generateText({
-      model: xai('grok-3-mini'),
+      model: selectedModel,
       system: systemPrompt,
       prompt: message,
       temperature: 0.7,
+      ...providerOptions,
     });
 
     const response = {
       content: result.text,
-      model: 'grok-3-mini',
+      model: model === 'grok' ? 'grok-3-mini' : 'gpt-oss-120b',
       timestamp: new Date().toISOString(),
     };
 
@@ -176,32 +312,66 @@ export async function POST(request: NextRequest) {
 }
 
 // Handle streaming responses
-async function handleStreamingResponse(message: string, context?: string) {
+async function handleStreamingResponse(message: string, context?: string, model: 'grok' | 'gpt-oss' = 'grok') {
   const systemPrompt = createSystemPrompt(context);
+  const selectedModel = getModel(model);
+
+  // System prompt - middleware handles reasoning formatting for GPT OSS
+  const enhancedSystemPrompt = systemPrompt;
 
   try {
+    // Scira-main style provider options
+    const providerOptions = model === 'gpt-oss' ? {
+      groq: {
+        reasoningEffort: 'high', // Critical parameter for GPT OSS reasoning
+      },
+    } : {};
+
     const result = await streamText({
-      model: xai('grok-3-mini'),
-      system: systemPrompt,
+      model: selectedModel,
+      system: enhancedSystemPrompt,
       prompt: message,
       temperature: 0.7,
+      ...providerOptions,
     });
 
     // Create a readable stream for the response
     const stream = new ReadableStream({
       async start(controller) {
         try {
-          for await (const delta of result.textStream) {
-            const chunk = {
-              content: delta,
-              isComplete: false,
-            };
-            controller.enqueue(`data: ${JSON.stringify(chunk)}\n\n`);
+          let reasoningContent = '';
+
+          // Process the full stream - both models now provide reasoning-delta events
+          for await (const part of result.fullStream) {
+            if (part.type === 'reasoning-delta') {
+              // Handle reasoning from both models (Grok native + GPT OSS via middleware)
+              reasoningContent += part.text;
+
+              const chunk = {
+                reasoning: part.text,
+                isComplete: false,
+              };
+              controller.enqueue(`data: ${JSON.stringify(chunk)}\n\n`);
+            } else if (part.type === 'text-delta') {
+              // Handle text content
+              const chunk = {
+                content: part.text,
+                isComplete: false,
+              };
+              controller.enqueue(`data: ${JSON.stringify(chunk)}\n\n`);
+            }
           }
 
-          // Send completion signal
+          // Ensure reasoning has proper formatting
+          if (reasoningContent && !reasoningContent.includes('\n')) {
+            // If reasoning doesn't have line breaks, add some basic formatting
+            reasoningContent = reasoningContent.replace(/\. /g, '.\n').replace(/\! /g, '!\n').replace(/\? /g, '?\n');
+          }
+
+          // Send completion signal with final content
           const completionChunk = {
             content: '',
+            reasoning: reasoningContent,
             isComplete: true,
             timestamp: new Date().toISOString(),
           };
