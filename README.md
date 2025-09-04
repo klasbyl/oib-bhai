@@ -1,6 +1,6 @@
-# Chat Interface - Figma Design Implementation
+# AI Chat Interface - Figma Design Implementation
 
-This project is a pixel-perfect implementation of a Figma design for a chat/assistant interface, built with Next.js, TypeScript, and Tailwind CSS. The design has been made fully responsive for desktop and laptop screen sizes.
+This project is a pixel-perfect implementation of a Figma design for an AI chat/assistant interface, built with Next.js, TypeScript, and Tailwind CSS. The design has been made fully responsive for desktop and laptop screen sizes and now includes real AI chat functionality powered by xAI's Grok 3 Mini model.
 
 ## 🎨 Design Features
 
@@ -32,6 +32,8 @@ The interface is designed to work perfectly across all major desktop and laptop 
 - **TypeScript** for type safety
 - **Tailwind CSS** for styling
 - **React 19** for UI components
+- **AI SDK** for xAI integration
+- **xAI Grok 3 Mini** for AI chat functionality
 
 ### Key Components
 
@@ -41,6 +43,40 @@ The interface is designed to work perfectly across all major desktop and laptop 
 
 ### Asset Management
 All Figma assets (icons, images, SVGs) have been extracted and optimized for web use, stored in `/public/assets/`.
+
+## 🤖 AI Chat Features
+
+The interface now includes real AI chat functionality:
+
+- **Real-time AI responses** powered by xAI's Grok 3 Mini model
+- **Streaming responses** for better user experience
+- **Error handling** with retry mechanisms
+- **Rate limiting** protection
+- **Input validation** and sanitization
+- **Conversation management** with persistent threads
+
+### AI Components
+
+- `useAIChat` - React hook for chat functionality
+- `AIChatService` - Service layer for API interactions
+- `/api/chat` - Next.js API route with streaming support
+- Type-safe interfaces for all AI operations
+
+## 🔧 Environment Setup
+
+1. **Get xAI API Key**
+   - Visit [x.ai/api](https://x.ai/api) to get your API key
+   - Sign up for an account if you don't have one
+
+2. **Configure Environment Variables**
+   ```bash
+   # Create .env.local file in project root
+   XAI_API_KEY=your_xai_api_key_here
+
+   # Optional production settings
+   NODE_ENV=production
+   NEXT_PUBLIC_APP_URL=https://yourdomain.com
+   ```
 
 ## 🚀 Getting Started
 

@@ -131,7 +131,13 @@ export default function Sidebar({ isExpanded, onToggle, onClose }: SidebarProps)
             transition: 'opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
           }}
         >
-          <h1 className="text-white text-[28px] font-semibold whitespace-nowrap">My Chats</h1>
+          <h1
+            className="text-white text-[28px] font-semibold whitespace-nowrap cursor-pointer hover:opacity-80 transition-opacity"
+            onClick={onToggle}
+            aria-label="Collapse sidebar"
+          >
+            My Chats
+          </h1>
           <button 
             onClick={onToggle}
             data-sidebar-toggle

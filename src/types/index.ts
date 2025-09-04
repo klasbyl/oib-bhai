@@ -45,6 +45,8 @@ export interface ChatMessage {
   timestamp: Date;
   type: 'user' | 'ai';
   sources?: SourceItem[];
+  reasoning?: string;
+  isStreaming?: boolean;
 }
 
 export interface ChatThread {
@@ -53,6 +55,69 @@ export interface ChatThread {
   messages: ChatMessage[];
   createdAt: Date;
   updatedAt: Date;
+  isActive: boolean;
+}
+
+// AI-specific types
+export interface AIRequest {
+  message: string;
+  threadId?: string;
+  context?: string;
+}
+
+export interface AIResponse {
+  content: string;
+  reasoning?: string;
+  sources?: SourceItem[];
+  usage?: {
+    promptTokens: number;
+    completionTokens: number;
+    totalTokens: number;
+  };
+  model: string;
+  timestamp: Date;
+}
+
+export interface StreamingChunk {
+  content: string;
+  reasoning?: string;
+  isComplete: boolean;
+  sources?: SourceItem[];
+}
+
+// AI Service types
+export interface ChatServiceConfig {
+  apiKey: string;
+  model: string;
+  maxTokens: number;
+  temperature: number;
+  stream: boolean;
+}
+
+export interface ChatService {
+  sendMessage(request: AIRequest): Promise<AIResponse>;
+  streamMessage(request: AIRequest): AsyncIterable<StreamingChunk>;
+  validateRequest(request: AIRequest): boolean;
+}
+
+// Error types for AI
+export interface AIError extends AppError {
+  code: 'AI_SERVICE_ERROR' | 'AI_RATE_LIMIT' | 'AI_INVALID_REQUEST' | 'AI_MODEL_ERROR';
+  retryable: boolean;
+}
+
+// Hook return types for AI chat
+export interface UseAIChatReturn {
+  messages: ChatMessage[];
+  currentThread: ChatThread | null;
+  isLoading: boolean;
+  isStreaming: boolean;
+  error: AIError | null;
+  sendMessage: (content: string) => Promise<void>;
+  createNewThread: () => void;
+  switchThread: (threadId: string) => void;
+  clearMessages: () => void;
+  retryLastMessage: () => Promise<void>;
 }
 
 // UI State types

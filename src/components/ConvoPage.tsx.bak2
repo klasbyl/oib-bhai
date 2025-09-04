@@ -15,7 +15,6 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import Sidebar from "@/components/Sidebar";
 import SourcesPanel from "@/components/SourcesPanel";
 import ErrorBoundary from "@/components/ErrorBoundary";
@@ -31,7 +30,6 @@ export default function ConvoPage() {
   const [expandedReasoningMessages, setExpandedReasoningMessages] = useState<Set<string>>(new Set());
   const [initialMessage, setInitialMessage] = useState<string>("");
   const searchParams = useSearchParams();
-  const router = useRouter();
 
   // AI Chat functionality
   const {
@@ -75,6 +73,14 @@ export default function ConvoPage() {
   }, []);
 
   /**
+   * Toggle sources panel visibility
+   * Controls the display of source attribution panel
+   */
+  const toggleSourcesPanel = useCallback(() => {
+    setIsSourcesPanelOpen(prev => !prev);
+  }, []);
+
+  /**
    * Close sources panel programmatically
    * Used by mobile backdrop and other UI elements
    */
@@ -99,10 +105,6 @@ export default function ConvoPage() {
     });
   }, []);
 
-  const handleLogoClick = useCallback(() => {
-    router.push('/');
-  }, [router]);
-
   /**
    * Memoized message list to prevent unnecessary re-renders
    * Only updates when messages array changes
@@ -124,11 +126,11 @@ export default function ConvoPage() {
     }
   }, [messages, sendMessage]);
 
-    return (
+  return (
     <div className="chat-interface bg-[#1c1c1c] h-screen mobile-vh-fix w-full flex overflow-hidden relative">
       {/* Mobile Backdrop */}
       {(isSidebarExpanded || isSourcesPanelOpen) && (
-        <div
+        <div 
           className="fixed inset-0 bg-black/50 z-30 md:hidden"
           onClick={() => {
             if (isSidebarExpanded) closeSidebar();
@@ -138,100 +140,95 @@ export default function ConvoPage() {
       )}
 
       {/* Sidebar Navigation */}
-      <Sidebar
+      <Sidebar 
         isExpanded={isSidebarExpanded}
         onToggle={toggleSidebar}
         onClose={closeSidebar}
       />
 
       {/* Main Content Area */}
-      <ErrorBoundary>
-        <div className={`flex-1 flex flex-col h-full overflow-hidden transition-all duration-300 ${
-          isSidebarExpanded ? 'md:ml-2' : ''
-        }`}>
-          {/* Top Header */}
-          <div className="flex items-center justify-between px-4 sm:px-6 py-3 border-b border-white/10 flex-shrink-0">
-                      {/* Logo */}
-          <div
-            className="w-[45px] h-[45px] rounded-lg overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
-            onClick={handleLogoClick}
-            aria-label="Go to homepage"
-          >
+        <ErrorBoundary>
+      <div className={`flex-1 flex flex-col h-full overflow-hidden transition-all duration-300 ${
+        isSidebarExpanded ? 'md:ml-2' : ''
+      }`}>
+        {/* Top Header */}
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3 border-b border-white/10 flex-shrink-0">
+          {/* Logo */}
+          <div className="w-[45px] h-[45px] rounded-lg overflow-hidden">
             <Image src={ASSETS.images.logo} alt="Logo" width={45} height={45} className="w-full h-full object-cover" />
           </div>
-
-            {/* Upgrade button */}
-            <div className="bg-white rounded-[12px] px-3 sm:px-4 py-2 sm:py-2.5 flex items-center gap-2 hover:bg-gray-100 transition-colors cursor-pointer">
-              <Image src={ASSETS.icons.upgrade} alt="Upgrade icon" width={19} height={18} />
-              <span className="text-[#222222] font-medium text-sm sm:text-base">Upgrade</span>
-            </div>
+          
+          {/* Upgrade button */}
+          <div className="bg-white rounded-[12px] px-3 sm:px-4 py-2 sm:py-2.5 flex items-center gap-2 hover:bg-gray-100 transition-colors cursor-pointer">
+            <Image src={ASSETS.icons.upgrade} alt="Upgrade icon" width={19} height={18} />
+            <span className="text-[#222222] font-medium text-sm sm:text-base">Upgrade</span>
           </div>
+        </div>
 
-          {/* Chat Thread Interface */}
-          <div className={`flex-1 flex flex-col overflow-hidden transition-all duration-300 ${
-            isSourcesPanelOpen ? 'md:mr-[408px]' : ''
-          }`}>
-            {/* Scrollable Chat Area */}
-            <div className="flex-1 overflow-hidden px-3 sm:px-4 lg:px-6 py-3 sm:py-4 lg:py-6">
-              <div
-                ref={scrollContainerRef}
-                className="h-full overflow-y-auto pr-2 custom-scrollbar"
-                onScroll={handleScroll}
-              >
-                <div className="flex flex-col gap-[111px] w-full max-w-[786px] mx-auto">
-                  {/* Chat Messages */}
-                  <div className="flex flex-col gap-5 items-end w-full">
-                    {/* Initial Message from URL params */}
-                    {initialMessage && messages.length === 0 && (
-                      <div className="flex flex-col gap-2.5 items-end w-[471px] max-w-full">
-                        <div className="bg-[#222222] h-auto min-h-[79px] rounded-[12px] w-full p-5 flex items-center">
-                          <p className="text-white text-[16px] font-normal leading-normal">
-                            {initialMessage}
-                          </p>
-                        </div>
-                        <div className="h-[23px] w-[47px]">
-                          <Image src="/assets/9b92b08567bb06ffa9496a22e73251b7a42cb630.svg" alt="User timestamp" width={47} height={23} className="w-full h-full" />
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Dynamic Messages */}
-                    {messageList.map((msg) => (
-                      <div key={msg.id} className={`flex flex-col gap-2.5 ${msg.type === 'user' ? 'items-end' : 'items-start'} ${msg.type === 'user' ? 'w-[471px] max-w-full' : 'w-full max-w-[786px]'}`}>
-                        <ChatMessage
-                          message={msg}
-                          isExpanded={expandedReasoningMessages.has(msg.id)}
-                          onToggleReasoning={toggleReasoning}
-                        />
-                      </div>
-                    ))}
-
-                    {/* Error Message */}
-                    {error && (
-                      <ErrorMessage
-                        error={error}
-                        onRetry={handleRetry}
-                      />
-                    )}
+        {/* Chat Thread Interface */}
+        <div className={`flex-1 flex flex-col overflow-hidden transition-all duration-300 ${
+          isSourcesPanelOpen ? 'md:mr-[408px]' : ''
+        }`}>
+          {/* Scrollable Chat Area */}
+          <div className="flex-1 overflow-hidden px-3 sm:px-4 lg:px-6 py-3 sm:py-4 lg:py-6">
+            <div 
+              ref={scrollContainerRef}
+              className="h-full overflow-y-auto pr-2 custom-scrollbar"
+              onScroll={handleScroll}
+            >
+              <div className="flex flex-col gap-[111px] w-full max-w-[786px] mx-auto">
+                {/* Chat Messages */}
+                <div className="flex flex-col gap-5 items-end w-full">
+                {/* Initial Message from URL params */}
+                {initialMessage && messages.length === 0 && (
+                  <div className="flex flex-col gap-2.5 items-end w-[471px] max-w-full">
+                    <div className="bg-[#222222] h-auto min-h-[79px] rounded-[12px] w-full p-5 flex items-center">
+                      <p className="text-white text-[16px] font-normal leading-normal">
+                        {initialMessage}
+                      </p>
+                    </div>
+                    <div className="h-[23px] w-[47px]">
+                      <Image src="/assets/9b92b08567bb06ffa9496a22e73251b7a42cb630.svg" alt="User timestamp" width={47} height={23} className="w-full h-full" />
+                    </div>
                   </div>
+                )}
+
+                {/* Dynamic Messages */}
+                {messageList.map((msg) => (
+                  <ChatMessage
+                    key={msg.id}
+                    message={msg}
+                    isExpanded={expandedReasoningMessages.has(msg.id)}
+                    onToggleReasoning={toggleReasoning}
+                  />
+                ))}
+
+                {/* Error Message */}
+                {error && (
+                  <ErrorMessage
+                    error={error}
+                    onRetry={handleRetry}
+                  />
+                )}
+
+
                 </div>
               </div>
             </div>
-
-            {/* Fixed Input Area at Bottom */}
-            <ChatInput
-              onSubmit={sendMessage}
-              isLoading={isLoading}
-              isStreaming={isStreaming}
-              placeholder="Type your prompt here"
-              maxLength={CHAT_CONSTANTS.MAX_MESSAGE_LENGTH}
-            />
           </div>
+
+          {/* Fixed Input Area at Bottom */}
+          <ChatInput
+            onSubmit={sendMessage}
+            isLoading={isLoading}
+            isStreaming={isStreaming}
+                    placeholder="Type your prompt here" 
+            maxLength={CHAT_CONSTANTS.MAX_MESSAGE_LENGTH}
+          />
         </div>
       </ErrorBoundary>
-
       {/* Sources Panel */}
-      <SourcesPanel
+      <SourcesPanel 
         isOpen={isSourcesPanelOpen}
         onClose={closeSourcesPanel}
       />

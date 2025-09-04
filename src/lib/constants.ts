@@ -64,6 +64,20 @@ export const ANIMATIONS = {
   fast: 150,
   normal: 300,
   slow: 500,
+  reasoning: 400,
+} as const;
+
+// Chat-specific constants
+export const CHAT_CONSTANTS = {
+  MAX_MESSAGE_LENGTH: 10000,
+  SCROLL_DEBOUNCE_DELAY: 100,
+  STREAMING_POLL_INTERVAL: 100,
+  MESSAGE_GAP: 111,
+  USER_MESSAGE_WIDTH: 471,
+  AI_MESSAGE_MAX_WIDTH: 786,
+  INPUT_HEIGHT: 53,
+  BORDER_RADIUS: 12,
+  REASONING_MAX_HEIGHT: 400,
 } as const;
 
 // Z-index layers
@@ -85,6 +99,12 @@ export const ASSETS = {
     collapse: '/assets/a574039df521d686ab6965aae607a65faa7fca23.svg',
     close: '/assets/1d598a39bbd2a527534525f0c600ebeefb3638a5.svg',
     upgrade: '/assets/08c401b681a7f06ff91478a7a2727f1e2d8a5bb6.svg',
+    add: '/assets/318d58d830b9b38d9b0599b5ddf33d109fb41910.svg',
+    send: '/assets/54212aa38c8d48f27cff07bb9a2a1bbfe77ab63f.svg',
+    microphone: '/assets/1ac5dd6ed9e48c5888923a563979c8f56b46627c.svg',
+    toggle: '/assets/f336b203bf6c218af18453ce2315e93526c43331.svg',
+    userTimestamp: '/assets/9b92b08567bb06ffa9496a22e73251b7a42cb630.svg',
+    aiTimestamp: '/assets/661fccc37c4590d45a3e7486262613fb67247d95.svg',
   },
   images: {
     logo: '/assets/640b20a128648296e24f7ce09fa56b28396d42ce.png',
