@@ -15,15 +15,6 @@ const chatRequestSchema = z.object({
   model: z.enum(['grok', 'gpt-oss']).optional().default('grok'),
 });
 
-// Environment variable validation
-const XAI_API_KEY = process.env.XAI_API_KEY;
-const GROQ_API_KEY = process.env.GROQ_API_KEY;
-
-// At least one API key must be available
-if (!XAI_API_KEY && !GROQ_API_KEY) {
-  throw new Error('Either XAI_API_KEY or GROQ_API_KEY environment variable is required');
-}
-
 // Setup reasoning middleware for models that need it
 const reasoningMiddleware = extractReasoningMiddleware({
   tagName: 'think',
@@ -31,16 +22,20 @@ const reasoningMiddleware = extractReasoningMiddleware({
 
 // Model selection function - scira-main style implementation
 function getModel(modelType: 'grok' | 'gpt-oss') {
+  // Get environment variables at runtime (not build time)
+  const XAI_API_KEY = process.env.XAI_API_KEY;
+  const GROQ_API_KEY = process.env.GROQ_API_KEY;
+
   switch (modelType) {
     case 'grok':
       if (!XAI_API_KEY) {
-        throw new Error('XAI_API_KEY is required for Grok model');
+        throw new Error('XAI_API_KEY is required for Grok model. Please set it in your deployment environment.');
       }
       return xai('grok-3-mini') as any;
 
     case 'gpt-oss':
       if (!GROQ_API_KEY) {
-        throw new Error('GROQ_API_KEY is required for GPT OSS model');
+        throw new Error('GROQ_API_KEY is required for GPT OSS model. Please set it in your deployment environment.');
       }
       // Use wrapLanguageModel with reasoning middleware like scira-main
       return wrapLanguageModel({
@@ -50,6 +45,16 @@ function getModel(modelType: 'grok' | 'gpt-oss') {
 
     default:
       throw new Error(`Unsupported model type: ${modelType}`);
+  }
+}
+
+// Runtime validation function
+function validateEnvironment() {
+  const XAI_API_KEY = process.env.XAI_API_KEY;
+  const GROQ_API_KEY = process.env.GROQ_API_KEY;
+
+  if (!XAI_API_KEY && !GROQ_API_KEY) {
+    throw new Error('Either XAI_API_KEY or GROQ_API_KEY environment variable is required. Please set them in your deployment environment.');
   }
 }
 
@@ -210,6 +215,9 @@ Your goal is to be the most valuable SaaS consultant the user has ever interacte
 // POST handler for regular (non-streaming) responses
 export async function POST(request: NextRequest) {
   try {
+    // Runtime environment validation
+    validateEnvironment();
+
     // Rate limiting
     const clientIP = getClientIP(request);
     if (!checkRateLimit(clientIP)) {
@@ -313,6 +321,9 @@ export async function POST(request: NextRequest) {
 
 // Handle streaming responses
 async function handleStreamingResponse(message: string, context?: string, model: 'grok' | 'gpt-oss' = 'grok') {
+  // Runtime environment validation
+  validateEnvironment();
+
   const systemPrompt = createSystemPrompt(context);
   const selectedModel = getModel(model);
 
